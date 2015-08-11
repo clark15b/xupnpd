@@ -132,7 +132,7 @@ int libjson::luaL_pack_unicode_to_utf8(luaL_Buffer* buf,const unsigned char* p)
         sscanf(tmp,"%x",&ch);
     }
 
-    if(ch>=0x00000000 && ch<=0x0000007F)
+    if(ch<=0x0000007F)
 	n=sprintf(tmp,"%c",(char)(ch&0x7f));
     else if(ch>=0x00000080 && ch<=0x000007FF)
 	n=sprintf(tmp,"%c%c",(char)(((ch>>6)&0x1f)|0xc0),(char)((ch&0x3f)|0x80));
