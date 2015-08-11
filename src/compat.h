@@ -7,11 +7,11 @@
 #ifndef __COMPAT_H
 #define __COMPAT_H
 
-#ifdef __FreeBSD__
+#if defined(__FreeBSD__) || defined(__APPLE__)
 #define O_LARGEFILE     0
 #define lseek64         lseek
 typedef off_t           off64_t;
-#endif /*  __FreeBSD__  */
+#endif /*  __FreeBSD__ || __APPLE__ */
 
 #ifdef _UNDER_WIN
 #include <cygwin/types.h>

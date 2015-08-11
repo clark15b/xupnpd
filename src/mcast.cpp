@@ -95,11 +95,11 @@ int mcast::get_if_info(const char* if_name,if_info* ifi)
     {
         ifreq ifr;
 
-#ifdef __FreeBSD__
+#if defined(__FreeBSD__) || defined(__APPLE__)
         snprintf(ifr.ifr_name,IFNAMSIZ,"%s",if_name);
 #else
         snprintf(ifr.ifr_ifrn.ifrn_name,IFNAMSIZ,"%s",if_name);
-#endif /* __FreeBSD__ */
+#endif /* __FreeBSD__ || __APPLE__ */
 
         snprintf(ifi->if_name,IF_NAME_LEN,"%s",if_name);
 
@@ -159,11 +159,11 @@ int mcast::get_if_list(if_info* ifi,int nifi)
 
                 for(int i=0;i<n;i++)
                 {
-#ifdef __FreeBSD__
+#if defined(__FreeBSD__) || defined(__APPLE__)
                     get_if_info(ifr[i].ifr_name,ifi+i);
 #else
                     get_if_info(ifr[i].ifr_ifrn.ifrn_name,ifi+i);
-#endif /* __FreeBSD__ */
+#endif /* __FreeBSD__ || __APPLE__ */
                 }
             }
 
