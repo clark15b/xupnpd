@@ -604,16 +604,30 @@ static int lua_m3u_parse(lua_State* L)
                 lua_pushstring(L,track_name);
                 lua_rawset(L,-3);
 
-                static const char file_tag[]="file://";
+                static const char url_scheme_hint[]="://";
+                static const char file_scheme[]="file://";
 
-                if(strncmp(track_url,file_tag,sizeof(file_tag)-1))
+                int is_path_with_file_scheme=0;
+                int is_url=strstr(track_url, url_scheme_hint) ? 1 : 0;
+                
+                if(is_url)
+                {
+                    if(!strncmp(track_url,file_scheme,sizeof(file_scheme)-1))
+                    {
+                        is_url=0;
+                        is_path_with_file_scheme=1;
+                    }
+                }
+                if(is_url)
                 {
                     lua_pushstring(L,"url");
                     lua_pushstring(L,track_url);
                     lua_rawset(L,-3);
                 }else
                 {
-                    char* _track_url=track_url+sizeof(file_tag)-1;
+					char* _track_url=track_url;
+					if(is_path_with_file_scheme)
+                        _track_url +=sizeof(file_scheme)-1;
 
                     lua_pushstring(L,"path");
                     lua_pushstring(L,_track_url);
