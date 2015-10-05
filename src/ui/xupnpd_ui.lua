@@ -578,7 +578,7 @@ function ui_handler(args,data,ip,url)
 
     local action=string.match(url,'^/ui/(.+)$')
 
-    if action=='style' then
+   --[[ if action=='style' then
         http_send_headers(200,'css')
         http.sendfile(cfg.ui_path..'bootstrap.min.css')
         return
@@ -587,12 +587,34 @@ function ui_handler(args,data,ip,url)
         return
     end
 
-    if action and string.find(action,'.+%.m3u$') then
+	
+    if action and  then
         ui_download(action)
         return
     end
-
-    if not action then action='main' end
+	
+	]]
+	if action then
+	
+		if string.find(action,'.+%.m3u$') then 
+			ui_download(action)
+			return
+		elseif action=='api' then 
+			ui_api_call(args)
+			return
+		elseif string.find(action,'.+%.css$') then 
+			http_send_headers(200,'css')
+			http.sendfile(cfg.ui_path..action)
+			return
+		elseif string.find(action,'.+%.js$') then 
+			http_send_headers(200,'js')
+			http.sendfile(cfg.ui_path..action)
+			return
+		end
+		
+	else
+		action='main' 
+	end
 
     http_send_headers(200,'html')
 
