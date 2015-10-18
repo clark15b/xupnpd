@@ -99,7 +99,6 @@ end
 function http_send_headers(err,ext,len)
 
 http_cahce= {}
-http_cahce['html']='max-age=3600'
 http_cahce['jpg']='max-age=3600'
 http_cahce['png']='max-age=3600'
 http_cahce['ico']='max-age=3600'
@@ -109,7 +108,7 @@ http_cahce['js']='max-age=3600'
     http.send(
         string.format(
             'HTTP/1.1 %i %s\r\n'..
-            'Pragma: no-cache\r\n'..
+            -- 'Pragma: no-cache\r\n'..
             'Cache-control: %s\r\n'..
             'Date: %s\r\n'..
             'Server: %s\r\n'..
