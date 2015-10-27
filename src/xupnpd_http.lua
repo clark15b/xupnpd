@@ -23,6 +23,9 @@ http_mime['css']='text/css'
 http_mime['json']='application/json'
 http_mime['js']='application/javascript'
 http_mime['m3u']='audio/x-mpegurl'
+http_mime['svg']='image/svg+xml'
+http_mime['eot']='application/vnd.ms-fontobject'
+http_mime['woff']='application/font-woff'
 
 -- http http_error list
 http_err[100]='Continue'
@@ -98,12 +101,15 @@ end
 
 function http_send_headers(err,ext,len)
 
-http_cahce= {}
-http_cahce['jpg']='max-age=3600'
-http_cahce['png']='max-age=3600'
-http_cahce['ico']='max-age=3600'
-http_cahce['css']='max-age=3600'
-http_cahce['js']='max-age=3600'
+	http_cahce= {}
+	http_cahce['jpg']='max-age=3600'
+	http_cahce['png']='max-age=3600'
+	http_cahce['ico']='max-age=3600'
+	http_cahce['css']='max-age=3600'
+	http_cahce['js']='max-age=3600'
+	http_mime['svg']='image/svg+xml'
+	http_mime['eot']='max-age=3600'
+	http_mime['woff']='max-age=3600'
 
     http.send(
         string.format(
