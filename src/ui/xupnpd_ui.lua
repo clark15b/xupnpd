@@ -581,11 +581,11 @@ function ui_handler(args,data,ip,url)
 	if action then
 	local  path_file , file_format =string.match(action, "(.+%.(%a+))[%?]?.*$")
 		
-		if  file_format == 'm3u' then 
-			ui_download(action)
-			return
-		elseif action=='api' then 
+		if isempty(file_format) then
 			ui_api_call(args)
+			return
+		elseif  file_format == 'm3u' then 
+			ui_download(action)
 			return
 		else
 			http_send_headers(200,file_format)
