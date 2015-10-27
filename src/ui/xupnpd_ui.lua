@@ -579,17 +579,19 @@ function ui_handler(args,data,ip,url)
     local action=string.match(url,'^/ui/(.+)$')
 
 	if action then
-	local  path_file , file_format =string.match(action, "(.+%.(%a+))[%?]?.*$")
+		local  path_file , file_format =string.match(action, "(.+%.(%a+))[%?]?.*$")
 		
-		if isempty(file_format) then
-			ui_api_call(args)
-			return
-		elseif  file_format == 'm3u' then 
+		if  file_format == 'm3u' then 
 			ui_download(action)
 			return
-		else
+		elseif file_format then
 			http_send_headers(200,file_format)
 			http.sendfile(cfg.ui_path..path_file)
+			return
+		end
+		
+		if action == "api" then 
+			ui_api_call(args)
 			return
 		end
 		
