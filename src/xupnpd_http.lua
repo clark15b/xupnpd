@@ -23,6 +23,9 @@ http_mime['css']='text/css'
 http_mime['json']='application/json'
 http_mime['js']='application/javascript'
 http_mime['m3u']='audio/x-mpegurl'
+http_mime['svg']='image/svg+xml'
+http_mime['eot']='application/vnd.ms-fontobject'
+http_mime['woff']='application/font-woff'
 
 -- http http_error list
 http_err[100]='Continue'
@@ -97,11 +100,30 @@ function compile_templates()
 end
 
 function http_send_headers(err,ext,len)
+
+	http_cahce= {}
+	http_cahce['jpg']='max-age=3600'
+	http_cahce['png']='max-age=3600'
+	http_cahce['ico']='max-age=3600'
+	http_cahce['css']='max-age=3600'
+	http_cahce['js']='max-age=3600'
+	http_mime['svg']='image/svg+xml'
+	http_mime['eot']='max-age=3600'
+	http_mime['woff']='max-age=3600'
+
     http.send(
         string.format(
-            'HTTP/1.1 %i %s\r\nPragma: no-cache\r\nCache-control: no-cache\r\nDate: %s\r\nServer: %s\r\nAccept-Ranges: none\r\n'..
-            'Connection: close\r\nContent-Type: %s\r\nEXT:\r\n',
-            err,http_err[err] or 'Unknown',os.date('!%a, %d %b %Y %H:%M:%S GMT'),ssdp_server,http_mime[ext] or 'application/x-octet-stream')
+            'HTTP/1.1 %i %s\r\n'..
+            -- 'Pragma: no-cache\r\n'..
+            'Cache-control: %s\r\n'..
+            'Date: %s\r\n'..
+            'Server: %s\r\n'..
+            'Accept-Ranges: none\r\n'..
+            'Connection: close\r\n'..
+            'Content-Type: %s\r\nEXT:\r\n',
+             err,http_err[err] or 'Unknown',
+             http_cahce[ext] or 'no-cache',
+             os.date('!%a, %d %b %Y %H:%M:%S GMT'),ssdp_server,http_mime[ext] or 'application/x-octet-stream')
     )
     if len then http.send(string.format("Content-Length: %s\r\n",len)) end
     http.send("\r\n")
