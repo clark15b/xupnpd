@@ -343,7 +343,29 @@
 
     <!-- Custom Theme JavaScript -->
     <script src="/ui/js/sb-admin-2.js"></script>
-
+	<script >
+	if(document.location.protocol =="file:"){
+		var link = document.getElementsByTagName("link");
+		for( var i = 0; i< link.length; i++){
+			var t = link[i];
+			
+			console.log("Замена ссылки %s -> %s",t.getAttribute("href"),t.getAttribute("href").replace("/ui/",""));
+			
+			t.setAttribute("href",t.getAttribute("href").replace("/ui/",""));
+		}
+		
+		var script = document.getElementsByTagName("script");
+		for( var i = 0; i< script.length; i++){
+			var t = script[i];
+			if(t.getAttribute("src")){
+				console.log("Замена ссылки %s -> %s",t.getAttribute("src"),t.getAttribute('src').replace("/ui/",""));
+				t.setAttribute("src",t.getAttribute("src").replace("/ui/",""));
+			}
+			//console.log()
+			//
+		}
+	}
+</script>
 </body>
 
 </html>

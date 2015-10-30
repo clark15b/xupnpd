@@ -107,28 +107,51 @@ function http_send_headers(err,ext,len)
 	http_cahce['ico']='max-age=3600'
 	http_cahce['css']='max-age=3600'
 	http_cahce['js']='max-age=3600'
-	http_mime['svg']='image/svg+xml'
+	http_mime['svg']='max-age=3600'
 	http_mime['eot']='max-age=3600'
 	http_mime['woff']='max-age=3600'
 
     http.send(
         string.format(
             'HTTP/1.1 %i %s\r\n'..
-            -- 'Pragma: no-cache\r\n'..
-            'Cache-control: %s\r\n'..
             'Date: %s\r\n'..
             'Server: %s\r\n'..
             'Accept-Ranges: none\r\n'..
-            'Connection: close\r\n'..
-            'Content-Type: %s\r\nEXT:\r\n',
-             err,http_err[err] or 'Unknown',
-             http_cahce[ext] or 'no-cache',
-             os.date('!%a, %d %b %Y %H:%M:%S GMT'),ssdp_server,http_mime[ext] or 'application/x-octet-stream')
+            'Connection: close\r\n',
+			    err,
+				http_err[err] or 'Unknown',
+                os.date('!%a, %d %b %Y %H:%M:%S GMT'),
+			    ssdp_server
+		)
     )
-    if len then http.send(string.format("Content-Length: %s\r\n",len)) end
+	if err == 200 then
+		http.send(
+			string.format(
+				'Cache-control: %s\r\n'..
+				'Content-Type: %s\r\nEXT:\r\n',
+					http_cahce[ext] or 'no-cache',
+					http_mime[ext] or 'application/x-octet-stream'
+			 )
+		)
+	end
+	
+	if err >= 300  and err < 400 then
+		http.send string.format("Location: %s\r\n", ext)
+	end
+	
+    if len then 
+		http.send(string.format("Content-Length: %s\r\n",len)) 
+	end
+	
     http.send("\r\n")
 
-    if cfg.debug>0 and err~=200 then print('http error '..err) end
+    if cfg.debug>0 then
+		if err >= 300 and err < 400  then 
+			print('http rederict '..err..' Location ' .. ext) 
+		elseif err> 400 then
+			print('http rederict '..err)
+		end
+	end
 
 end
 
@@ -263,7 +286,13 @@ function http_handler(what,from,port,msg)
     end
 
     if msg.reqline[2]=='/' then
-        if http_ui_main then msg.reqline[2]='/ui' else msg.reqline[2]='/index.html' end
+        if http_ui_main then 
+			http_send_headers(301,"ui/") --Делаем редерикт для админки, что бы не таскать везде магичскую строчку "ui" и не писать абсолютные пути в HTML админки
+			return
+			msg.reqline[2]='/ui' 
+		else 
+			msg.reqline[2]='/index.html' 
+		end
     end
 
     local head=false
