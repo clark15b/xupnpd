@@ -60,7 +60,7 @@ http_err[413]='Request Entity Too Large'
 http_err[414]='Request-URL Too Large'
 http_err[415]='Unsupported Media Type'
 http_err[416]='Requested range not satisfiable'
-http_err[500]='Internal Server http_error'
+http_err[500]='Internal Server error'
 http_err[501]='Not Implemented'
 http_err[502]='Bad Gateway'
 http_err[503]='Out of Resources'
@@ -569,10 +569,14 @@ function http_handler(what,from,port,msg)
 
         local mtype,extras=playlist_item_type(pls)
 
+        local status_code=200
+
+        if msg.range then status_code=206 end
+
         http.send(string.format(
-            'HTTP/1.1 200 OK\r\nPragma: no-cache\r\nCache-control: no-cache\r\nDate: %s\r\nServer: %s\r\n'..
+            'HTTP/1.1 %d OK\r\nPragma: no-cache\r\nCache-control: no-cache\r\nDate: %s\r\nServer: %s\r\n'..
             'Connection: close\r\nContent-Type: %s\r\nEXT:\r\n',
-            os.date('!%a, %d %b %Y %H:%M:%S GMT'),ssdp_server,mtype[3]))
+            status_code,os.date('!%a, %d %b %Y %H:%M:%S GMT'),ssdp_server,mtype[3]))
 
         if flen then
             http.send(string.format('Accept-Ranges: bytes\r\nContent-Length: %s\r\n',flen))
