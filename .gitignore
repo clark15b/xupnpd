@@ -1,2 +1,5 @@
 *.[oa]
 *.sw[po]
+*.o
+*.a
+xupnpd
