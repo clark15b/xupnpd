@@ -1,0 +1,115 @@
+<!DOCTYPE html>
+<html lang="en" dir="ltr">
+<head>
+<meta charset="UTF-8" />
+<link rel="stylesheet" href="bootstrap/css/bootstrap.css">
+<title>xupnpd - API</title>
+<script type="text/javascript">
+ var _gaq = _gaq || [];
+ _gaq.push(['_setAccount', 'UA-35435852-1']);
+ _gaq.push(['_trackPageview']);
+ (function() {
+ var ga = document.createElement('script'); ga.type = 'text/javascript'; ga.async = true;
+ ga.src = ('https:' == document.location.protocol ? 'https://ssl' : 'http://www') + '.google-analytics.com/ga.js';
+ var s = document.getElementsByTagName('script')[0]; s.parentNode.insertBefore(ga, s);
+ })();
+</script>
+</head>
+
+<body>
+
+<div class="container">
+
+<h3><span id="About_API_xupnpd"> About xupnpd API </span></h3>
+The <b>xupnpd</b> API accepts requests via standard HTTP GET, and can respond with plain text.
+
+<h3><span id="Add_feed"> Add feed </span></h3>
+wget -q -O - 'http://127.0.0.1:4044/ui/api?action=add_feed&plugin=youtube&feed=thelonelyisland&name=The+Lonely+Island'<br/>
+OK
+
+<h3><span id="Show_feeds"> Show feeds </span></h3>
+wget -q -O - 'http://127.0.0.1:4044/ui/api?action=feeds'<br/>
+1;Vimeo HD Channel<br/>
+2;HD Xtreme sports<br/>
+3;Mountain Bike Channel<br/>
+4;YouTube Top Rated<br/>
+5;GT - PS3 - Review<br/>
+6;GT - PS3 - Preview<br/>
+7;GT - PS3 - Gameplay<br/>
+8;GiantBomb - All<br/>
+9;AG - New<br/>
+10;IVI - New<br/>
+11;The Lonely Island<br/>
+
+<h3><span id="Remove_feed"> Remove feed by id </span></h3>
+wget -q -O - 'http://127.0.0.1:4044/ui/api?action=remove_feed&id=11'<br/>
+OK
+
+<h3><span id="Save_feeds"> Save feeds to persist </span></h3>
+wget -q -O - 'http://127.0.0.1:4044/ui/api?action=save_feeds'<br/>
+OK
+
+<h3><span id="Update_feeds"> Reload feeds </span></h3>
+wget -q -O - 'http://127.0.0.1:4044/ui/api?action=update_feeds'<br/>
+OK
+
+<h3><span id="Update_playlists"> Reload playlists </span></h3>
+wget -q -O - 'http://127.0.0.1:4044/ui/api?action=reload'<br/>
+OK
+
+<p><div><script type="text/javascript"><!--
+google_ad_client = "ca-pub-8299725827970601";
+/* xupnpd-336-top */
+google_ad_slot = "2514515695";
+google_ad_width = 336;
+google_ad_height = 280;
+//-->
+</script>
+<script type="text/javascript"
+src="http://pagead2.googlesyndication.com/pagead/show_ads.js">
+</script></div></p>
+
+
+<h3><span id="Status"> Show active streams </span></h3>
+wget -q -O - 'http://127.0.0.1:4044/ui/api?action=status'<br/>
+22578;127.0.0.1 Battlefield 1943 Theme Song
+
+<h3><span id="Stop_stream"> Stop stream by pid </span></h3>
+wget -q -O - 'http://127.0.0.1:4044/ui/api?action=kill&pid=22578'<br/>
+OK
+
+<h3><span id="Show_playlists"> Show playlists </span></h3>
+wget -q -O - 'http://127.0.0.1:4044/ui/api?action=playlists'<br/>
+1;Mozhay.tv<br/>
+2;AG - New<br/>
+3;Battlefield theme songs<br/>
+4;GT - PS3 - Gameplay<br/>
+5;GT - PS3 - Preview<br/>
+6;GT - PS3 - Review<br/>
+7;GiantBomb - All<br/>
+8;IVI - New<br/>
+9;Vimeo HD Channel<br/>
+10;HD Xtreme sports<br/>
+11;Mountain Bike Channel<br/>
+12;YouTube Top Rated<br/>
+
+<h3><span id="Show_playlist"> Show playlist items by id </span></h3>
+wget -q -O - 'http://127.0.0.1:4044/ui/api?action=playlist&id=12'<br/>
+1;http://i.ytimg.com/vi/KQ6zr6kCPj8/1.jpg;LMFAO - Party Rock Anthem ft. Lauren Bennett, GoonRock<br/>
+2;http://i.ytimg.com/vi/kffacxfA7G4/1.jpg;Justin Bieber - Baby ft. Ludacris<br/>
+3;http://i.ytimg.com/vi/j5-yKhDd64s/1.jpg;Eminem - Not Afraid<br/>
+4;http://i.ytimg.com/vi/uelHwf8o7_U/1.jpg;Eminem - Love The Way You Lie ft. Rihanna<br/>
+5;http://i.ytimg.com/vi/fLexgOxsZu0/1.jpg;Bruno Mars - The Lazy Song [Official Video]<br/>
+6;http://i.ytimg.com/vi/rYEDA3JcQqw/1.jpg;Adele - Rolling In The Deep<br/>
+7;http://i.ytimg.com/vi/t4H_Zoh7G5A/1.jpg;Jennifer Lopez - On The Floor ft. Pitbull<br/>
+
+
+<p align=right><br/>
+<b>License</b>: <a href='https://github.com/clark15b/xupnpd/blob/master/LICENSE'>GPL</a><br>
+Copyright (C) 2014-2015 Anton Burdinuk<br />
+clark15b@gmail.com
+</p>
+
+</div>
+
+</html>
