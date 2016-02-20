@@ -111,7 +111,7 @@ function get_playlist_item_parent(s)
     local t={}
 
     for i in string.gmatch(s,'(%w+)_') do table.insert(t,i) end
-    
+
     return table.concat(t,'_')
 end
 

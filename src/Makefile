@@ -16,22 +16,22 @@ LUAMYCFLAGS+=-static
 endif
 
 x86:
-	make -C $(LUA) CC=gcc a
-	gcc -O2 -c -o md5.o md5c.c
-	gcc $(CFLAGS) -DWITH_LIBUUID -D_LARGEFILE_SOURCE -D_FILE_OFFSET_BITS=64 -o xupnpd $(SRC) md5.o -llua -ldl -lm -luuid
+	$(MAKE) -C $(LUA) CC=$(CC) a
+	$(CC) -O2 -c -o md5.o md5c.c
+	$(CC) $(CFLAGS) -DWITH_LIBUUID -D_LARGEFILE_SOURCE -D_FILE_OFFSET_BITS=64 -o xupnpd $(SRC) md5.o -llua -ldl -lm -luuid
 	strip xupnpd
 
 # Cygwin
 x86win:
-	make -C $(LUA) CC=gcc a
-	gcc -O2 -c -o md5.o md5c.c
-	gcc $(CFLAGS) -DWITH_LIBUUID -D_LARGEFILE_SOURCE -D_FILE_OFFSET_BITS=64 -D_UNDER_WIN -o xupnpd $(SRC) md5.o -llua -ldl -lm -luuid
+	$(MAKE) -C $(LUA) CC=$(CC) a
+	$(CC) -O2 -c -o md5.o md5c.c
+	$(CC) $(CFLAGS) -DWITH_LIBUUID -D_LARGEFILE_SOURCE -D_FILE_OFFSET_BITS=64 -D_UNDER_WIN -o xupnpd $(SRC) md5.o -llua -ldl -lm -luuid
 	strip xupnpd
 
 x86_bsd:
-	make -C $(LUA) CC=gcc a
-	gcc -O2 -c -o md5.o md5c.c
-	gcc $(CFLAGS) -DINET -DWITH_LIBUUID -o xupnpd $(SRC) md5.o -llua -lm
+	$(MAKE) -C $(LUA) CC=$(CC) a
+	$(CC) -O2 -c -o md5.o md5c.c
+	$(CC) $(CFLAGS) -DINET -DWITH_LIBUUID -o xupnpd $(SRC) md5.o -llua -lm
 	strip xupnpd
 
 
@@ -85,12 +85,12 @@ dreambox:
 
 
 embedded:
-	PATH=$(PATH):$(UTILS) make -C $(LUA) CC=$(SDK)/gcc a MYCFLAGS='$(LUAMYCFLAGS)'
-	$(SDK)/gcc -O2 -c -B$(UTILS) -o md5.o md5c.c
-	$(SDK)/gcc $(CFLAGS) -B$(UTILS) -DWITH_URANDOM -o xupnpd-$(TARGET) $(SRC) md5.o -llua -lm -ldl
+	PATH=$(PATH):$(UTILS) $(MAKE) -C $(LUA) CC=$(SDK)/$(CC) a MYCFLAGS='$(LUAMYCFLAGS)'
+	$(SDK)/$(CC) -O2 -c -B$(UTILS) -o md5.o md5c.c
+	$(SDK)/$(CC) $(CFLAGS) -B$(UTILS) -DWITH_URANDOM -o xupnpd-$(TARGET) $(SRC) md5.o -llua -lm -ldl
 	$(SDK)/strip xupnpd-$(TARGET)
 
 clean:
-	make -C $(LUA) clean
+	$(MAKE) -C $(LUA) clean
 	rm -f $(LUA)/liblua.a
 	rm -f md5.o

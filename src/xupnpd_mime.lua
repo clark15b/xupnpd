@@ -13,7 +13,7 @@ upnp_class=
 {
     ['video']     = 'object.item.videoItem',
     ['audio']     = 'object.item.audioItem.musicTrack'
-}                
+}
 
 
 upnp_proto=
