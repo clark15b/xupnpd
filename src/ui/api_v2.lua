@@ -1,13 +1,13 @@
 function ui_api_v_2_call(args)
 
     res = nil
-    http_send_headers(200,'txt')
-
+	
     if args.action=='status' then
         res = json.encode(http_vars)
     end
-    if not res then
+    if res then
         http_send_headers(200,'json')
+		http.send(res)
     else
         http_send_headers(404)
     end

@@ -595,7 +595,7 @@ function ui_handler(args,data,ip,url)
 			return
 		end
 		if action == "api_v2" then 
-			dofile("api_v2.lua")
+			dofile(cfg.ui_path.."api_v2.lua")
 			ui_api_v_2_call(args)
 			return
 		end
