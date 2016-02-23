@@ -271,7 +271,7 @@
                                     </button>
                                 </span>
                             </div>
-                            
+
                         </li>-->
                         <li>
                             <a href=""><i class="fa fa-dashboard fa-fw"></i> Dashboard</a>
@@ -332,6 +332,19 @@
     </div>
     <!-- /#wrapper -->
 
+
+    <script type="text/template" id="status-main">
+        <div >
+            <h3>Status</h3>
+            UUID: <%- uuid %><br/>
+            Uptime: <%- uptime %> <a style='font-size: 8pt' href="/ui">refresh</a> <br/>
+            SSDP Interface: <%- interface %><br/>
+            WWW Port: <%- port %><br/>
+            Model: <a href=<%- url %>><%- name %>-<%-version %></a><br/>
+            Manufacturer: <%- manufacturer %><br/>
+            <i><%- description %></i><br/><br/>
+        </div>
+    </script>
     <!-- jQuery -->
     <script src="js/jquery.min.js"></script>
 
@@ -343,20 +356,29 @@
 
     <!-- Custom Theme JavaScript -->
     <script src="js/sb-admin-2.js"></script>
-	
+
 	<!-- underscore -->
     <script src="js/underscore.js"></script>
 	<!-- backbone -->
     <script src="js/backbone.js"></script>
 	<!-- backbone.babysitter -->
     <script src="js/backbone.babysitter.js"></script>
-	
+
 	<!-- backbone.babysitter -->
     <script src="js/backbone.marionette.min.js"></script>
 	<script src="js/backbone.wreqr.js"></script>
-	
-	<script src="js/app/app.js"></script>
-	
+
+    <script src="js/override/Backbone.Marionette.CompositeView.prototype.attachElContent.js"></script>
+    <script src="js/override/Backbone.Marionette.ItemView.prototype.attachElContent.js"></script>
+    <script src="js/override/Backbone.Marionette.View.prototype.tagName.js"></script>
+
+    <script src="js/app/app.js"></script>
+
+
+    <script src="js/app/Status/Status.route.js"></script>
+
+
+
 </body>
 
 </html>

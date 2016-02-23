@@ -1,27 +1,27 @@
-﻿var GSU = new Marionette.Application();
+﻿var Xupnpd = new Marionette.Application();
 
-GSU.addRegions({
+Xupnpd.addRegions({
     mainRegion: "#main-region",
     modal: "#modal-window-region"
 
 });
 
 
-GSU.navigate = function (route, options) {
+Xupnpd.navigate = function (route, options) {
     options || (options = {});
     Backbone.history.navigate(route, options);
 };
 
 
-GSU.getCurrentRoute = function () {
+Xupnpd.getCurrentRoute = function () {
     return Backbone.history.fragment
 };
 
-GSU.closeModal = function () {
-    GSU.modal.reset()
+Xupnpd.closeModal = function () {
+    Xupnpd.modal.reset()
 };
 
-GSU.loadMask = {
+Xupnpd.loadMask = {
 
 
     _selector: "#loading",
@@ -34,32 +34,32 @@ GSU.loadMask = {
     }
 
 }
-GSU.on("modalWindow:close", function (param) {
-    GSU.closeModal();
+Xupnpd.on("modalWindow:close", function (param) {
+    Xupnpd.closeModal();
 });
 /*
- GSU.addInitializer(function () {
+ Xupnpd.addInitializer(function () {
  // console.log("Запуск инициализации");
 
  if (this.getCurrentRoute() === "") {
- GSU.trigger("about:show");
+ Xupnpd.trigger("about:show");
  }
 
  });
  */
-GSU.token = "azaza";
-GSU.message = function (msg, type) {
+Xupnpd.token = "azaza";
+Xupnpd.message = function (msg, type) {
     alert(msg);
 };
 
-GSU.cache = {};
+Xupnpd.cache = {};
 
-GSU.on("start", function (options) {
+Xupnpd.on("start", function (options) {
     /*
      if (!sessionStorage.getItem("token")) {
      document.location = "/Home/Login";
      } else {
-     GSU.token = sessionStorage.getItem("token");
+     Xupnpd.token = sessionStorage.getItem("token");
      }
      */
 
@@ -67,23 +67,26 @@ GSU.on("start", function (options) {
     if (Backbone.history) {
         Backbone.history.start();
     }
-    if (this.getCurrentRoute() === "") {
-        GSU.trigger("Main:show");
+    var urlPath =  document.location.pathname.match("/ui/(.+)");
+    if( !urlPath || urlPath.length > 1 && urlPath[1] == "ui_template.html"){
+        if (this.getCurrentRoute() === "" ) {
+            Xupnpd.trigger("Status:show");
+        }
     }
 
 
 });
 
-GSU.addInitializer(function (options) {
+Xupnpd.addInitializer(function (options) {
 
     console.log("Запуск инициализации");
 
-    //GSU.cache.personel = new GSU.Common.CachePersonel();
-    //GSU.cache.personel.fetch();
+    //Xupnpd.cache.personel = new Xupnpd.Common.CachePersonel();
+    //Xupnpd.cache.personel.fetch();
 
 });
 
 
 $(function () {
-    GSU.start();
+    Xupnpd.start();
 })
