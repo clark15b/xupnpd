@@ -38,18 +38,10 @@ Xupnpd.module("Pages.Status", function (Status, Xupnpd, Backbone, Marionette, $,
 
     Status.view = Backbone.Marionette.ItemView.extend({
        template: "#status-main",
-	modelEvents: {
-            "sync": "onSyncModel"/*,
-            "change:currentQuestionId": "onChangeCurrentQuestionId"*/
-        },
        initialize: function (paramId) {
             this.model = new Status.model();
             this.model.fetch();
-
         },
-	onSyncModel:function(){
-		this.render();
-	}
    });
 
 

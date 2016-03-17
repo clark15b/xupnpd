@@ -1,7 +1,7 @@
 cfg={}
 
 -- multicast interface for SSDP exchange, 'eth0', 'br0', 'br-lan' for example
-cfg.ssdp_interface='lo'
+cfg.ssdp_interface='eth0'
 
 -- 'cfg.ssdp_loop' enables multicast loop (if player and server in one host)
 cfg.ssdp_loop=1
