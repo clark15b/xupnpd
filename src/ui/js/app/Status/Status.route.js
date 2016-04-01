@@ -1,4 +1,4 @@
-Xupnpd.module("Pages.Status", function (Status, Xupnpd, Backbone, Marionette, $, _) {
+Xupnpd.module("Status", function (Status, Xupnpd, Backbone, Marionette, $, _) {
 
 
     Status.Router = Marionette.AppRouter.extend({
@@ -38,7 +38,10 @@ Xupnpd.module("Pages.Status", function (Status, Xupnpd, Backbone, Marionette, $,
 
     Status.view = Backbone.Marionette.ItemView.extend({
        template: "#status-main",
-	modelEvents: {
+       events:{
+         "click .refresh-js":"onRefresh"
+       },
+	      modelEvents: {
             "sync": "onSyncModel"/*,
             "change:currentQuestionId": "onChangeCurrentQuestionId"*/
         },
@@ -47,9 +50,14 @@ Xupnpd.module("Pages.Status", function (Status, Xupnpd, Backbone, Marionette, $,
             this.model.fetch();
 
         },
-	onSyncModel:function(){
-		this.render();
-	}
+      	onSyncModel:function(){
+      		this.render();
+      	},
+        onRefresh:function(event){
+          debugger;
+          event.preventDefault();
+          this.model.fetch();
+        }
    });
 
 

@@ -175,7 +175,7 @@ function ui_plugins()
     for i,j in pairs(plugins) do
         if j.name then
             local status
-            
+
             if j.disabled==true then
                 status=string.format('<a href="/ui/plugins?n=%s&s=on">on</a> | <b>off</b>',util.urlencode(i))
             else
@@ -220,7 +220,7 @@ function ui_profiles()
 
     for i,j in pairs(profiles) do
         local status
-            
+
         if j.disabled==true then
             status=string.format('<a href="/ui/profiles?n=%s&s=on">on</a> | <b>off</b>',util.urlencode(i))
         else
@@ -368,7 +368,7 @@ function ui_config()
     http.send('    { var obj=document.getElementById(id); for(i=0;i<obj.length;i++) { if(obj.options[i].value==value) { obj.options[i].selected=true; break; } } }\n')
     http.send('function set_input_value(id,value)\n')
     http.send('    { var obj=document.getElementById(id); if(obj) { obj.value=value } }\n')
-                        
+
     for plugin_name,plugin in pairs(plugins) do
         if plugin.ui_config_vars then
             for i,var in ipairs(plugin.ui_config_vars) do
@@ -580,8 +580,8 @@ function ui_handler(args,data,ip,url)
 
 	if action then
 		local  path_file , file_format =string.match(action, "(.+%.(%a+))[%?]?.*$")
-		
-		if  file_format == 'm3u' then 
+
+		if  file_format == 'm3u' then
 			ui_download(action)
 			return
 		elseif file_format then
@@ -589,19 +589,19 @@ function ui_handler(args,data,ip,url)
 			http.sendfile(cfg.ui_path..path_file)
 			return
 		end
-		
-		if action == "api" then 
+
+		if action == "api" then
 			ui_api_call(args)
 			return
 		end
-		if action == "api_v2" then 
+		if string.find(action,"api_v2") then
 			dofile(cfg.ui_path.."api_v2.lua")
-			ui_api_v_2_call(args)
+			ui_api_v_2_call(args,data,ip,url)
 			return
 		end
-		
+
 	else
-		action='main' 
+		action='main'
 	end
 
     http_send_headers(200,'html')
