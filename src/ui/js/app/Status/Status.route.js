@@ -22,7 +22,7 @@ Xupnpd.module("Status", function (Status, Xupnpd, Backbone, Marionette, $, _) {
     });
 
     Status.model = Backbone.Model.extend({
-        urlRoot: "api_v2?action=status",
+        urlRoot: "api_v2/status",
         defaults: {
             uuid: "uuid",
             uptime: "uptime",

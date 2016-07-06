@@ -2,9 +2,12 @@
 -- clark15b@gmail.com
 -- https://tsdemuxer.googlecode.com/svn/trunk/xupnpd
 
+
+
+
 ui_args=nil
 ui_data=nil
-
+dofile(cfg.ui_path.."helper.lua")
 function ui_main()
     http.sendtfile(cfg.ui_path..'ui_main.html',http_vars)
 end
@@ -567,7 +570,7 @@ ui_actions=
     ['restart']         = { 'xupnpd - restart', ui_restart }
 }
 
-function ui_handler(args,data,ip,url)
+function ui_handler(args,data,ip,url,methtod)
     for plugin_name,plugin in pairs(plugins) do
         if plugin.ui_actons then
             for act_name,act in pairs(plugin.ui_actons) do
@@ -594,9 +597,11 @@ function ui_handler(args,data,ip,url)
 			ui_api_call(args)
 			return
 		end
+
 		if string.find(action,"api_v2") then
 			dofile(cfg.ui_path.."api_v2.lua")
-			ui_api_v_2_call(args,data,ip,url)
+
+			ui_api_v_2_call(args,data,ip, string.gsub(url, "/ui/api_v2/", ''),methtod)
 			return
 		end
 

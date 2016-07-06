@@ -134,20 +134,20 @@ function http_send_headers(err,ext,len)
 			 )
 		)
 	end
-	
+
 	if err >= 300  and err < 400 then
 		http.send( string.format("Location: %s\r\n", ext))
 	end
-	
-    if len then 
-		http.send(string.format("Content-Length: %s\r\n",len)) 
+
+    if len then
+		http.send(string.format("Content-Length: %s\r\n",len))
 	end
-	
+
     http.send("\r\n")
 
     if cfg.debug>0 then
-		if err >= 300 and err < 400  then 
-			print('http rederict '..err..' Location ' .. ext) 
+		if err >= 300 and err < 400  then
+			print('http rederict '..err..' Location ' .. ext)
 		elseif err> 400 then
 			print('http rederict '..err)
 		end
@@ -286,12 +286,12 @@ function http_handler(what,from,port,msg)
     end
 
     if msg.reqline[2]=='/' then
-        if http_ui_main then 
+        if http_ui_main then
 			http_send_headers(301,"ui/") --Делаем редерикт для админки, что бы не таскать везде магичскую строчку "ui" и не писать абсолютные пути в HTML админки
 			msg.reqline[2]='/ui'
  			return
-		else 
-			msg.reqline[2]='/index.html' 
+		else
+			msg.reqline[2]='/index.html'
 		end
     end
 
@@ -313,7 +313,7 @@ function http_handler(what,from,port,msg)
             http_send_headers(404)
         else
             dofile(http_ui_main)
-            ui_handler(f.args,msg.data or '',from_ip,f.url)
+            ui_handler(f.args,msg.data or '',from_ip,f.url,msg.reqline[1])
         end
         return
     elseif string.find(f.url,'^/app/?') then

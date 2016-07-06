@@ -10,8 +10,11 @@ Xupnpd.module("PlayList", function (PlayList, Xupnpd, Backbone, Marionette, $, _
        initialize: function (paramId) {
        },
        remove:function(){
-          this.model.destroy();
+         if(confirm("Delete?")){
 
+
+          this.model.destroy();
+        }
        }
 
     });

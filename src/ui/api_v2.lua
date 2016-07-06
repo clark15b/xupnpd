@@ -1,23 +1,10 @@
-function ui_api_v_2_call(args,data,ip,url)
+function ui_api_v_2_call(args,data,ip,url,methtod)
 
+    methtod = string.upper(methtod)
+    route = string.split(url, '/')
     res = nil
-
-    if args.action=='status' then
-        res = {}
-        res['uuid'] = http_vars.uuid
-        res['description'] = http_vars.description
-        res['uptime'] = http_vars.uptime()
-        res['fname'] = http_vars.fname
-        res['port'] = http_vars.port
-        res['name'] = http_vars.name
-        res['version'] = http_vars.version
-        res['manufacturer_url'] = http_vars.manufacturer_url
-        res['manufacturer'] = http_vars.manufacturer
-        res['interface'] = http_vars.interface
-        res['url'] = http_vars.url
-    end
-    if args.action=='playlist' then
-
+    if methtod == "GET" then
+      if route[1] == 'playlist' then
         res = {}
         local d=util.dir(cfg.playlists_path)
         if d then
@@ -25,12 +12,30 @@ function ui_api_v_2_call(args,data,ip,url)
             for i,j in ipairs(d) do
                 if string.find(j,'.+%.m3u$') then
                     local fname=util.urlencode(j)
-                    table.insert (res,{ name = j, id = j } )
+                    table.insert (res,{ name = j, id = string.gsub(j, ".m3u", '') } )
                     --http.send(string.format('<tr><td><a href=\'/ui/show?fname=%s&%s\'>%s</a> [<a href=\'/ui/remove?fname=%s&%s\'>x</a>]</td></tr>\n',fname,'',j,fname,''))
                 end
             end
         end
+      end
+      if route[1] =='status' then
+          res = {}
+          res['uuid'] = http_vars.uuid
+          res['description'] = http_vars.description
+          res['uptime'] = http_vars.uptime()
+          res['fname'] = http_vars.fname
+          res['port'] = http_vars.port
+          res['name'] = http_vars.name
+          res['version'] = http_vars.version
+          res['manufacturer_url'] = http_vars.manufacturer_url
+          res['manufacturer'] = http_vars.manufacturer
+          res['interface'] = http_vars.interface
+          res['url'] = http_vars.url
+      end
     end
+
+
+
 
     if arg.action == "playlist_remove" then
       res = {success = false}
