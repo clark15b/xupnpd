@@ -278,7 +278,8 @@ function ui_remove()
             local path=cfg.playlists_path
             if ui_args.feed=='1' then path=cfg.feeds_path end
 
-            if os.remove(path..real_name) then
+--            if os.remove(path..real_name) then
+            if os.execute(string.format('rm -f %s%s',path,real_name)) then
                 core.sendevent('reload')
                 http.send('<h3>OK</h3>')
             else
