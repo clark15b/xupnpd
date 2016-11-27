@@ -9,4 +9,13 @@ Xupnpd.module("PlayList", function (PlayList, Xupnpd, Backbone, Marionette, $, _
 
         }
     });
+
+    PlayList.modelDetail = Backbone.Model.extend({
+        defaults: {
+            name: "-",
+            id: "",
+            url: ""
+
+        }
+    });
 });

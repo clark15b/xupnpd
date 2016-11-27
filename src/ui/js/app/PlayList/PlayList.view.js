@@ -5,16 +5,18 @@ Xupnpd.module("PlayList", function (PlayList, Xupnpd, Backbone, Marionette, $, _
     PlayList.Itemview = Backbone.Marionette.ItemView.extend({
        template: "#PlayList-item",
        events:{
-         "click .remove-js":"remove"
+         "click .remove-js": "removePlaylist",
+         "click .detail-js": "showSubVideo"
        },
        initialize: function (paramId) {
        },
-       remove:function(){
+       removePlaylist:function(){
          if(confirm("Delete?")){
-
-
-          this.model.destroy();
+          this.model.destroy({});
         }
+       },
+       showSubVideo:function(){
+         document.location = "/ui/show?fname=" + this.model.id + ".m3u";
        }
 
     });
@@ -27,15 +29,23 @@ Xupnpd.module("PlayList", function (PlayList, Xupnpd, Backbone, Marionette, $, _
         "click .refresh-js":"onRefresh"
       },
        modelEvents: {
-           "sync": "onSyncModel"/*,
-           "change:currentQuestionId": "onChangeCurrentQuestionId"*/
+           "sync": "onSyncModel"
        },
+       modelEvents: {
+           "sync": "onSyncModel"
+       },
+       collectionEvents: {
+            "sync": "onSyncCollection"
+        },
       initialize: function (paramId) {
            this.collection = new PlayList.collection();
            this.collection.fetch();
 
        },
        onSyncModel:function(){
+         this.render();
+       },
+       onSyncCollection:function(){
          this.render();
        },
        onRefresh:function(event){

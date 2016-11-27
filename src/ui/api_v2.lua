@@ -33,29 +33,29 @@ function ui_api_v_2_call(args,data,ip,url,methtod)
           res['url'] = http_vars.url
       end
     end
-
-
-
-
-    if arg.action == "playlist_remove" then
-      res = {success = false}
-      if arg.fname then
-          local real_name=util.urldecode(ui_args.fname)
-          if string.find(real_name,'^[^-/\\]+%.m3u$') then
-              local path=cfg.playlists_path
-              if ui_args.feed=='1' then path=cfg.feeds_path end
-              if true or  os.remove(path..real_name) then
-                  core.sendevent('reload')
-                  res.success = true
-              else
-                  res.success = false
-              end
-          end
+    if methtod == "DELETE" then
+      if route[1] == "playlist" then
+        res = {success = false}
+        if route[2] then
+            local real_name=util.urldecode( route[2] ) .. ".m3u"
+            local path=cfg.playlists_path
+            if args.feed=='1' then path=cfg.feeds_path end
+            if  os.remove(path..real_name) then
+                core.sendevent('reload')
+                res.success = true
+            else
+                res = nil
+            end
+        end
       end
     end
+
+
+
+
     if res then
         http_send_headers(200,'json')
-		http.send(json.encode(res))
+	      http.send(json.encode(res))
     else
         http_send_headers(404)
         	http.send(json.encode(url))

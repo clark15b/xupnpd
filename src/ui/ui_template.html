@@ -348,9 +348,9 @@
 
     <script type="text/template" id="PlayList-item">
       <tr>
-        <td><%- name %></td>
+        <td class="detail-js" style="cursor:pointer;"><%- name %></td>
         <td>
-          <a class="btn btn-danger remove-js" ><i class="fa fa-times-circle"></i> Delete</a> 
+          <button class="btn btn-danger remove-js" ><i class="fa fa-times-circle"></i> Delete</button>
         </td>
       </tr>
     </script>
@@ -380,11 +380,40 @@
         <hr>
         <br>
         <a class="btn btn-primary" href="/ui/reload">Reload</a>
-        <a class="btn btn-primary" href="/ui/reload_feeds?return_url=/ui/playlists">Reload feeds</a>
+        <a class="btn btn-primary" href="/ui/reload_feeds?return_url=/ui/#Playlists">Reload feeds</a>
         <a class="btn btn-info" href="/ui">Back</a>
       <div>
     </script>
 
+    <script type="text/template" id="PlayList-main-detail">
+      <div>
+        <h3>Playlists</h3>
+        <br>
+        <table class="table">
+          <tbody>
+            <tr>
+              <td>
+                <a href="/ui/show?fname=ag_videos%2Em3u&amp;">ag_videos.m3u</a> [<a href="/ui/remove?fname=ag_videos%2Em3u&amp;">x</a>]
+              </td>
+              <td><a class="btn btn-danger">dsfsdf</a> </td>
+            </tr>
+          </tbody>
+        </table>
+        <br>
+        <h3>Upload *.m3u file</h3>
+        <form method="post" action="/ui/upload" enctype="multipart/form-data">
+          <input name="m3ufile" type="file">
+          <br>
+          <br>
+          <input class="btn btn-primary" value="Send" type="submit">
+        </form>
+        <hr>
+        <br>
+        <a class="btn btn-primary" href="/ui/reload">Reload</a>
+        <a class="btn btn-primary" href="/ui/reload_feeds?return_url=/ui/#Playlists">Reload feeds</a>
+        <a class="btn btn-info" href="/ui">Back</a>
+      <div>
+    </script>
     <!-- jQuery -->
     <script src="js/jquery.min.js"></script>
 
