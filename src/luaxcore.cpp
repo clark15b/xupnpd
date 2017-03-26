@@ -1,4 +1,4 @@
-/* 
+/*
  * Copyright (C) 2011-2015 Anton Burdinuk
  * clark15b@gmail.com
  * https://tsdemuxer.googlecode.com/svn/trunk/xupnpd
@@ -29,6 +29,7 @@
 #include <netdb.h>
 #include <ctype.h>
 #include "compat.h"
+#include "openssl/ssl.h"
 
 // HTML5
 // ACE Stream (http://torrent-tv.ru/)
@@ -55,6 +56,8 @@ namespace core
 
     char user_agent[256]="xupnpd";
 
+	SSL_CTX *ssl_ctx=NULL;
+	
     struct url_data
     {
         char host[128];
@@ -62,6 +65,7 @@ namespace core
         int port;
         char urn[1024];
         char auth[256];
+        int ssl;
     };
 
     struct timer_event
@@ -88,7 +92,9 @@ namespace core
     int detached=0;             // daemon
     FILE* http_client_fp=0;     // for HTTP workers only
 
-    FILE* connect(const char* s,int port);
+    int connect(const char* s,int port);
+    FILE* sock2file(int socket);
+	BIO* sock2bio(int socket, SSL* ssl);
 
     mcast::mcast_grp ssdp_mcast_grp;
     int ssdp_upstream=-1;
@@ -1238,6 +1244,7 @@ static int lua_core_mainloop(lua_State* L)
 
     ssdp_done();
     listener_clear();
+	if (ssl_ctx != NULL) SSL_CTX_free(ssl_ctx);
 
     signal(SIGTERM,SIG_IGN);
     signal(SIGCHLD,SIG_IGN);
@@ -1518,7 +1525,7 @@ static int lua_http_compile_template(lua_State* L)
     return rc;
 }
 
-FILE* core::connect(const char* s,int port)
+int core::connect(const char* s,int port)
 {
     sockaddr_in sin;
     sin.sin_family=AF_INET;
@@ -1546,15 +1553,36 @@ FILE* core::connect(const char* s,int port)
 
     int on=1;
     setsockopt(fd,IPPROTO_TCP,TCP_NODELAY,&on,sizeof(on));
+    return fd;
+}
 
-    FILE* fp=fdopen(fd,"a+");
+FILE* core::sock2file(int socket) {
+	if (socket==0) return NULL;
+    FILE* fp=fdopen(socket,"a+");
     if(!fp)
     {
-        close(fd);
-        return 0;
+        close(socket);
+        return NULL;
     }
-
     return fp;
+}
+
+BIO* core::sock2bio(int socket, SSL* ssl) {
+	if (socket==0 || ssl==NULL) return NULL;
+    BIO* sbio;
+    BIO *buf_io;
+    BIO *ssl_bio;
+	sbio = BIO_new_socket(socket, BIO_NOCLOSE);
+	SSL_set_bio(ssl, sbio, sbio);
+    //SSL_set_fd (ssl, socket);
+	int err=SSL_connect(ssl);
+    buf_io = BIO_new(BIO_f_buffer());  /* create a buffer BIO */
+    ssl_bio = BIO_new(BIO_f_ssl());           /* create an ssl BIO */
+    BIO_set_ssl(ssl_bio, ssl, BIO_CLOSE);       /* assign the ssl BIO to SSL */
+    BIO_push(buf_io, ssl_bio);          /* add ssl_bio to buf_io */ 
+	//fbio = BIO_new(BIO_f_buffer());
+	//BIO_push(fbio, sbio); 
+    return buf_io;
 }
 
 static int lua_http_get_url_data(const char* url,core::url_data* d)
@@ -1566,6 +1594,7 @@ static int lua_http_get_url_data(const char* url,core::url_data* d)
     d->port=0;
     *d->urn=0;
     *d->auth=0;                                        
+    d->ssl=0;
 
     int n=snprintf(tmp,sizeof(tmp),"%s",url);
     if(n<0 || n>=sizeof(tmp))
@@ -1581,12 +1610,17 @@ static int lua_http_get_url_data(const char* url,core::url_data* d)
     {
         *p=0;
 
-        if(strcasecmp(host,"http"))
+        if(!strcasecmp(host,"https")) {
+            port=443;
+            d->ssl=1;
+        }
+        else if(!strcasecmp(host,"http"))
+            port=80;
+        else
             return -1;
 
         host=p+sizeof(proto_tag)-1;
 
-        port=80;
     }
 
     char* urn=strchr(host,'/');
@@ -1631,13 +1665,17 @@ static int lua_http_get_url_data(const char* url,core::url_data* d)
     return 0;
 }
 
-static size_t lua_http_read_chunk(char* ptr,size_t size,FILE* fp)
+static size_t lua_http_read_chunk(char* ptr,size_t size,FILE* fp,BIO* bio)
 {
     size_t l=0;
 
     while(l<size)
     {
-        size_t n=fread(ptr+l,1,size-l,fp);
+        size_t n=0;
+        if (fp)
+            n=fread(ptr+l,1,size-l,fp);
+        else if (bio)
+            n=BIO_read(bio, ptr+l, size-l); 
         if(!n)
             break;
         else
@@ -1674,32 +1712,59 @@ static int lua_http_sendurl(lua_State* L)
 
     alarm(core::http_timeout);
 
-    FILE* fp=core::connect(url.host,url.port);
-    if(!fp)
+    int sock=core::connect(url.host,url.port);
+    FILE* fp=NULL;
+    SSL* ssl=NULL;
+    BIO* bio=NULL;
+    if (url.ssl) {
+        ssl=SSL_new(core::ssl_ctx);
+        bio=core::sock2bio(sock,ssl);
+    } else 
+        fp=core::sock2file(sock);
+    if(!fp && !bio)
     {
+        if (ssl) SSL_free (ssl);
         alarm(0);
         lua_pushinteger(L,rc);
         return 1;
     }
 
-    fprintf(fp,"GET %s HTTP/1.0\r\nHost: %s\r\nUser-Agent: %s\r\nConnection: close\r\nCache-Control: no-cache\r\n",url.urn,url.vhost,core::user_agent);
-    if(range && *range)
-        fprintf(fp,"Range: %s\r\n",range);
+    if (url.ssl) {
+        BIO_printf (bio,"GET %s HTTP/1.0\r\nHost: %s\r\nUser-Agent: %s\r\nConnection: close\r\nCache-Control: no-cache\r\n",url.urn,url.vhost,core::user_agent);
+        if(range && *range)
+            BIO_printf(bio,"Range: %s\r\n",range);
 
-    if(*url.auth)
-        fprintf(fp,"Authorization: Basic %s\r\n",url.auth);
+        if(*url.auth)
+            BIO_printf(bio,"Authorization: Basic %s\r\n",url.auth);
 
-    fprintf(fp,"\r\n");
-    fflush(fp);
+        BIO_printf(bio,"\r\n");
+        BIO_flush(bio);
+    } else {
+        fprintf(fp,"GET %s HTTP/1.0\r\nHost: %s\r\nUser-Agent: %s\r\nConnection: close\r\nCache-Control: no-cache\r\n",url.urn,url.vhost,core::user_agent);
+        if(range && *range)
+            fprintf(fp,"Range: %s\r\n",range);
 
+        if(*url.auth)
+            fprintf(fp,"Authorization: Basic %s\r\n",url.auth);
+
+        fprintf(fp,"\r\n");
+        fflush(fp);
+    }
     int idx=0;
 
     int status=0;
 
     char* tmp=(char*)malloc(core::http_sendurl_buf_size);
 
-    while(fgets(tmp,core::http_sendurl_buf_size,fp))
+    while(1)
     {
+        if (url.ssl) {
+            if (0>=BIO_gets(bio,tmp,core::http_sendurl_buf_size))
+                break;
+        } else {
+            if (!fgets(tmp,core::http_sendurl_buf_size,fp))
+                break;
+        }
         char* p=strpbrk(tmp,"\r\n");
         if(p)
             *p=0;
@@ -1753,7 +1818,11 @@ static int lua_http_sendurl(lua_State* L)
 
     if(status!=200 && status!=206)
     {
-        fclose(fp);
+        if (fp) fclose(fp);
+        if (bio) {
+            SSL_set_shutdown(ssl, SSL_SENT_SHUTDOWN|SSL_RECEIVED_SHUTDOWN); 
+            BIO_free_all(bio);			
+        }
         alarm(0);
         lua_pushinteger(L,rc);
 
@@ -1778,7 +1847,7 @@ static int lua_http_sendurl(lua_State* L)
 
     int dfd=fileno(core::http_client_fp);
 
-    while((n=lua_http_read_chunk(tmp,core::http_sendurl_buf_size,fp))>0)
+    while((n=lua_http_read_chunk(tmp,core::http_sendurl_buf_size,fp,bio))>0)
     {
         size_t ll=0;
 
@@ -1795,7 +1864,11 @@ static int lua_http_sendurl(lua_State* L)
 
     alarm(0);
 
-    fclose(fp);
+    if (fp) fclose(fp);
+    if (bio) {
+        SSL_set_shutdown(ssl, SSL_SENT_SHUTDOWN|SSL_RECEIVED_SHUTDOWN); 
+        BIO_free_all(bio);			
+    }
 
     lua_pushinteger(L,rc);
 
@@ -1906,7 +1979,7 @@ static int lua_http_notify(lua_State* L)
 
     alarm(core::http_timeout);
 
-    FILE* fp=core::connect(url.host,url.port);
+    FILE* fp=core::sock2file(core::connect(url.host,url.port));
     if(!fp)
     {
         alarm(0);
@@ -1966,24 +2039,52 @@ static int lua_http_download(lua_State* L)
         {
             alarm(core::http_timeout);
 
-            FILE* fp=core::connect(url.host,url.port);
-            if(fp)
+            int sock=core::connect(url.host,url.port);
+            FILE* fp=NULL;
+            SSL* ssl=NULL;
+            BIO* bio=NULL;
+            if (url.ssl) {
+                ssl=SSL_new(core::ssl_ctx);
+                bio=core::sock2bio(sock,ssl);
+            } else 
+                fp=core::sock2file(sock);
+            if(fp || bio)
             {
-                fprintf(fp,
-                    "%s %s HTTP/1.0\r\nHost: %s\r\nUser-Agent: %s\r\nConnection: close\r\nCache-Control: no-cache\r\n",*post_data?"POST":"GET",
-                        url.urn,url.vhost,core::user_agent);
+                if (url.ssl) {
+                    BIO_printf(bio,
+                        "%s %s HTTP/1.0\r\nHost: %s\r\nUser-Agent: %s\r\nConnection: close\r\nCache-Control: no-cache\r\n",*post_data?"POST":"GET",
+                            url.urn,url.vhost,core::user_agent);
+//    printf("lua_http_download bioprintf:\r\n%s %s HTTP/1.0\r\nHost: %s\r\nUser-Agent: %s\r\nConnection: close\r\nCache-Control: no-cache\r\n",*post_data?"POST":"GET",
+                            //url.urn,url.vhost,core::user_agent);
 
-                if(*post_data)
-                    fprintf(fp,"Content-Length: %lu\r\n",(unsigned long)post_data_size);
+                    if(*post_data)
+                        BIO_printf(bio,"Content-Length: %lu\r\n",(unsigned long)post_data_size);
 
-//                fprintf(fp,"Accept-Charset: utf-8\r\n");
+    //                fprintf(fp,"Accept-Charset: utf-8\r\n");
 
-                fprintf(fp,"\r\n");
+                    BIO_printf(bio,"\r\n");
 
-                if(*post_data)
-                    fwrite(post_data,post_data_size,1,fp);
+                    if(*post_data)
+                        BIO_write(bio,post_data,post_data_size);
 
-                fflush(fp);
+                    BIO_flush(bio);
+                } else {
+                    fprintf(fp,
+                        "%s %s HTTP/1.0\r\nHost: %s\r\nUser-Agent: %s\r\nConnection: close\r\nCache-Control: no-cache\r\n",*post_data?"POST":"GET",
+                            url.urn,url.vhost,core::user_agent);
+
+                    if(*post_data)
+                        fprintf(fp,"Content-Length: %lu\r\n",(unsigned long)post_data_size);
+
+    //                fprintf(fp,"Accept-Charset: utf-8\r\n");
+
+                    fprintf(fp,"\r\n");
+
+                    if(*post_data)
+                        fwrite(post_data,post_data_size,1,fp);
+
+                    fflush(fp);
+                }
                 int status=0;
                 int content_length=-1;
 
@@ -1991,8 +2092,15 @@ static int lua_http_download(lua_State* L)
                 char tmp[1024];
                 int idx=0;
 
-                while(fgets(tmp,sizeof(tmp),fp))
+                while(1)
                 {
+                    if (url.ssl) {
+                        if (0>=BIO_gets(bio,tmp,sizeof(tmp)))
+                            break;
+                    } else {
+                        if (!fgets(tmp,sizeof(tmp),fp))
+                            break;
+                    }
                     char* p=strpbrk(tmp,"\r\n");
                     if(p)
                         *p=0;
@@ -2034,8 +2142,13 @@ static int lua_http_download(lua_State* L)
                     idx++;
                 }
 
-                while((n=fread(tmp,1,sizeof(tmp),fp))>0)
+                while(1)
                 {
+                    if (url.ssl)
+                        n=BIO_read(bio, tmp, sizeof(tmp)); 
+                    else
+                        n=fread(tmp,1,sizeof(tmp),fp);
+                    if (n<=0) break;
                     if(dfp)
                     {
                         if(fwrite(tmp,1,n,dfp)!=n)
@@ -2050,7 +2163,11 @@ static int lua_http_download(lua_State* L)
                 if(status!=200 || (content_length!=-1 && content_length!=len))
                     len=0;
 
-                fclose(fp);
+                if (fp) fclose(fp);
+                if (bio) {
+                    SSL_set_shutdown(ssl, SSL_SENT_SHUTDOWN|SSL_RECEIVED_SHUTDOWN); 
+                    BIO_free_all(bio);			
+                }
             }
 
             alarm(0);
@@ -2099,14 +2216,31 @@ static int lua_http_get_length(lua_State* L)
         {
             alarm(core::http_timeout);
 
-            FILE* fp=core::connect(url.host,url.port);
-            if(fp)
+            int sock=core::connect(url.host,url.port);
+            FILE* fp=NULL;
+            SSL* ssl=NULL;
+            BIO* bio=NULL;
+            if (url.ssl) {
+                ssl=SSL_new(core::ssl_ctx);
+                bio=core::sock2bio(sock,ssl);
+            } else 
+                fp=core::sock2file(sock);
+            if(fp || bio)
             {
-                fprintf(fp,
-                    "HEAD %s HTTP/1.0\r\nHost: %s\r\nUser-Agent: %s\r\nConnection: close\r\nCache-Control: no-cache\r\n\r\n",
-                        url.urn,url.vhost,core::user_agent);
+                if (url.ssl) {
+                    BIO_printf(bio,
+                        "HEAD %s HTTP/1.0\r\nHost: %s\r\nUser-Agent: %s\r\nConnection: close\r\nCache-Control: no-cache\r\n\r\n",
+                            url.urn,url.vhost,core::user_agent);
 
-                fflush(fp);
+                    BIO_flush(bio);
+                } else {
+                    fprintf(fp,
+                        "HEAD %s HTTP/1.0\r\nHost: %s\r\nUser-Agent: %s\r\nConnection: close\r\nCache-Control: no-cache\r\n\r\n",
+                            url.urn,url.vhost,core::user_agent);
+
+                    fflush(fp);
+                }
+                
                 int status=0;
                 int content_length=-1;
 
@@ -2114,8 +2248,16 @@ static int lua_http_get_length(lua_State* L)
                 char tmp[1024];
                 int idx=0;
 
-                while(fgets(tmp,sizeof(tmp),fp))
+                while(1)
                 {
+                    if (url.ssl) {
+                        if (0>=BIO_gets(bio,tmp,sizeof(tmp)))
+                            break;
+                    } else {
+                        if (!fgets(tmp,sizeof(tmp),fp))
+                            break;
+                    }
+
                     char* p=strpbrk(tmp,"\r\n");
                     if(p)
                         *p=0;
@@ -2160,7 +2302,11 @@ static int lua_http_get_length(lua_State* L)
                 if(content_length>0)
                     len=content_length;
 
-                fclose(fp);
+                if (fp) fclose(fp);
+                if (bio) {
+                    SSL_set_shutdown(ssl, SSL_SENT_SHUTDOWN|SSL_RECEIVED_SHUTDOWN); 
+                    BIO_free_all(bio);			
+                }
             }
 
             alarm(0);
@@ -2321,11 +2467,16 @@ static int lua_core_uptime(lua_State* L)
     return 1;
 }
 
-
 int luaopen_luaxcore(lua_State* L)
 {
     mcast::uuid_init();
 
+	SSL_library_init(); 
+	SSL_load_error_strings();
+	OpenSSL_add_ssl_algorithms();
+	core::ssl_ctx=SSL_CTX_new(SSLv23_client_method());
+	SSL_CTX_set_verify(core::ssl_ctx, SSL_VERIFY_NONE, NULL);
+		
     static const luaL_Reg lib_core[]=
     {
         {"detach",lua_core_detach},
