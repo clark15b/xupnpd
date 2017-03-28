@@ -15,3 +15,11 @@ Thanks to Zyxmon (http://zyxmon.org), Smorygo Philipp
 Thanks to Semik for Gentoo patch
 Thanks to Alexander E. Patrakov for mcast-ifindex patch
 Thanks to Andrey Shevko for Web
+
+Added ssl support by AyratD.
+
+Change OPENSSL value in Makefile and next row:
+
+CFLAGS+= -I$(OPENSSL)/include -L$(OPENSSL)/lib/openwrt
+
+showing where *.h OpenSSL files and *.a OpenSSL files are located
