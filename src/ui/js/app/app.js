@@ -70,7 +70,7 @@ Xupnpd.on("start", function (options) {
     var urlPath =  document.location.pathname.match("/ui/(.+)");
     if( !urlPath || urlPath.length > 1 && urlPath[1] == "ui_template.html"){
         if (this.getCurrentRoute() === "" ) {
-            Xupnpd.trigger("PlayList:show");
+            Xupnpd.trigger("Status:show");
         }
     }
 
