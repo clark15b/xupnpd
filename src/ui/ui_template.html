@@ -271,10 +271,10 @@
                                     </button>
                                 </span>
                             </div>
-                            
+
                         </li>-->
                         <li>
-                            <a href=""><i class="fa fa-dashboard fa-fw"></i> Dashboard</a>
+                            <a href="/ui/"><i class="fa fa-dashboard fa-fw"></i> Dashboard</a>
                         </li>
                         <!--<li>
                             <a href="#"><i class="fa fa-bar-chart-o fa-fw"></i> Charts<span class="fa arrow"></span></a>
@@ -316,7 +316,7 @@
         <!-- Page Content -->
         <div id="page-wrapper">
             <div class="container-fluid">
-                <div class="row">
+                <div id="main-region" class="row ">
                     <!--<div class="col-lg-12">
                         <h1 class="page-header">Blank</h1>
                     </div>-->
@@ -332,6 +332,88 @@
     </div>
     <!-- /#wrapper -->
 
+
+    <script type="text/template" id="status-main">
+        <div >
+            <h3>Status</h3>
+            UUID: <%- uuid %><br/>
+            Uptime: <%- uptime %> <a class="refresh-js" style='font-size: 8pt' href="#33">refresh</a> <br/>
+            SSDP Interface: <%- interface %><br/>
+            WWW Port: <%- port %><br/>
+            Model: <a href=<%- url %>><%- name %>-<%-version %></a><br/>
+            Manufacturer: <%= manufacturer %><br/>
+            <i><%- description %></i><br/><br/>
+        </div>
+    </script>
+
+    <script type="text/template" id="PlayList-item">
+      <tr>
+        <td class="detail-js" style="cursor:pointer;"><%- name %></td>
+        <td>
+          <button class="btn btn-danger remove-js" ><i class="fa fa-times-circle"></i> Delete</button>
+        </td>
+      </tr>
+    </script>
+
+    <script type="text/template" id="PlayList-main">
+      <div>
+        <h3>Playlists</h3>
+        <br>
+        <table class="table">
+          <tbody>
+            <tr>
+              <td>
+                <a href="/ui/show?fname=ag_videos%2Em3u&amp;">ag_videos.m3u</a> [<a href="/ui/remove?fname=ag_videos%2Em3u&amp;">x</a>]
+              </td>
+              <td><a class="btn btn-danger">dsfsdf</a> </td>
+            </tr>
+          </tbody>
+        </table>
+        <br>
+        <h3>Upload *.m3u file</h3>
+        <form method="post" action="/ui/upload" enctype="multipart/form-data">
+          <input name="m3ufile" type="file">
+          <br>
+          <br>
+          <input class="btn btn-primary" value="Send" type="submit">
+        </form>
+        <hr>
+        <br>
+        <a class="btn btn-primary" href="/ui/reload">Reload</a>
+        <a class="btn btn-primary" href="/ui/reload_feeds?return_url=/ui/#Playlists">Reload feeds</a>
+        <a class="btn btn-info" href="/ui">Back</a>
+      <div>
+    </script>
+
+    <script type="text/template" id="PlayList-main-detail">
+      <div>
+        <h3>Playlists</h3>
+        <br>
+        <table class="table">
+          <tbody>
+            <tr>
+              <td>
+                <a href="/ui/show?fname=ag_videos%2Em3u&amp;">ag_videos.m3u</a> [<a href="/ui/remove?fname=ag_videos%2Em3u&amp;">x</a>]
+              </td>
+              <td><a class="btn btn-danger">dsfsdf</a> </td>
+            </tr>
+          </tbody>
+        </table>
+        <br>
+        <h3>Upload *.m3u file</h3>
+        <form method="post" action="/ui/upload" enctype="multipart/form-data">
+          <input name="m3ufile" type="file">
+          <br>
+          <br>
+          <input class="btn btn-primary" value="Send" type="submit">
+        </form>
+        <hr>
+        <br>
+        <a class="btn btn-primary" href="/ui/reload">Reload</a>
+        <a class="btn btn-primary" href="/ui/reload_feeds?return_url=/ui/#Playlists">Reload feeds</a>
+        <a class="btn btn-info" href="/ui">Back</a>
+      <div>
+    </script>
     <!-- jQuery -->
     <script src="js/jquery.min.js"></script>
 
@@ -343,7 +425,34 @@
 
     <!-- Custom Theme JavaScript -->
     <script src="js/sb-admin-2.js"></script>
-	
+
+	<!-- underscore -->
+    <script src="js/underscore.js"></script>
+	<!-- backbone -->
+    <script src="js/backbone.js"></script>
+	<!-- backbone.babysitter -->
+    <script src="js/backbone.babysitter.js"></script>
+
+	<!-- backbone.babysitter -->
+    <script src="js/backbone.marionette.min.js"></script>
+	<script src="js/backbone.wreqr.js"></script>
+
+    <script src="js/override/Backbone.Marionette.CompositeView.prototype.attachElContent.js"></script>
+    <script src="js/override/Backbone.Marionette.ItemView.prototype.attachElContent.js"></script>
+    <script src="js/override/Backbone.Marionette.View.prototype.tagName.js"></script>
+
+    <script src="js/app/app.js"></script>
+
+
+    <script src="js/app/Status/Status.route.js"></script>
+
+
+  <script src="js/app/PlayList/PlayList.model.js"></script>
+  <script src="js/app/PlayList/PlayList.collection.js"></script>
+  <script src="js/app/PlayList/PlayList.view.js"></script>
+    <script src="js/app/PlayList/PlayList.route.js"></script>
+
+
 </body>
 
 </html>

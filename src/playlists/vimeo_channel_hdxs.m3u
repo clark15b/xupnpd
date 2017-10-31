@@ -1,4 +1,8 @@
 #EXTM3U name="Vimeo Xtreme sports" type=mp4 plugin=vimeo
+#EXTINF:0 logo=http://i.vimeocdn.com/video/529799852_200x150.jpg ,Vic clips
+http://vimeo.com/135666318
+#EXTINF:0 logo=http://i.vimeocdn.com/video/495412132_200x150.jpg ,LAND OF NO USE - A Montana Wilderness Ski Project
+http://vimeo.com/110852431
 #EXTINF:0 logo=http://i.vimeocdn.com/video/499310568_200x150.jpg ,There's something about Ice
 http://vimeo.com/113779220
 #EXTINF:0 logo=http://i.vimeocdn.com/video/500632521_200x150.jpg ,NO ONE KNOWS : Mathieu Crepel FULL PART
