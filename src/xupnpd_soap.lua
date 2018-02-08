@@ -66,7 +66,11 @@ function playlist_item_to_xml(id,parent_id,pls)
 
     if cfg.sec_extras then
         if pls.path then
-            sec_extras=string.format('<sec:CaptionInfoEx sec:type="srt">%s/sub/%s.srt</sec:CaptionInfoEx>',www_location,objid)
+            for i, n in ipairs(util.dir(pls.path:sub(1, pls.path:len() - pls.url:len()))) do
+                if n:sub(n:len() - 4+1) == ".srt" then
+                    sec_extras=string.format('<sec:CaptionInfoEx sec:type="srt">%s/sub/%s%s</sec:CaptionInfoEx>',www_location,objid,util.urlencode(n:sub(pls.url:len() - 4+1)))
+                end
+            end
         end
 
         if pls.bookmark then
