@@ -520,11 +520,17 @@ function http_handler(what,from,port,msg)
     -- Subtitle
     elseif url=='sub' then
 
-        local pls=find_playlist_object(object)
+        local srt = "%s.srt":format(object)
+	local pls=nil
+	object = "%s_":format(object)
+	while object:len() > 0 and (not pls or not pls.path) do
+           object = object:gsub("_[^_]*$", "")
+           pls=find_playlist_object(object)
+	end
 
         if not pls or not pls.path then http_send_headers(404) return end
 
-        local path=string.gsub(pls.path,'.%w+$','.srt')
+        local path=string.gsub(pls.path,'.%w+$',srt:gsub(object, ""))
 
         local flen=util.getflen(path)
 
