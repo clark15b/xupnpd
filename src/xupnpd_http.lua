@@ -520,9 +520,9 @@ function http_handler(what,from,port,msg)
     -- Subtitle
     elseif url=='sub' then
 
-        local srt = "%s.srt":format(object)
+        local srt = string.format("%s.srt", object)
 	local pls=nil
-	object = "%s_":format(object)
+	object = string.format("%s_", object)
 	while object:len() > 0 and (not pls or not pls.path) do
            object = object:gsub("_[^_]*$", "")
            pls=find_playlist_object(object)
