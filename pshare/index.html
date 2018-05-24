@@ -1,0 +1,142 @@
+<html>
+<head><title>pshare - UPnP Playlist Browser</title>
+<script type="text/javascript">
+  var _gaq = _gaq || [];
+  _gaq.push(['_setAccount', 'UA-35433351-1']);
+  _gaq.push(['_trackPageview']);
+  (function() {
+    var ga = document.createElement('script'); ga.type = 'text/javascript'; ga.async = true;
+    ga.src = ('https:' == document.location.protocol ? 'https://ssl' : 'http://www') + '.google-analytics.com/ga.js';
+    var s = document.getElementsByTagName('script')[0]; s.parentNode.insertBefore(ga, s);
+  })();
+</script>
+</head>
+
+<body>
+
+<h2>xupnpd eXtensible UPnP agent</h2>
+xupnpd project homepage <a href='http://xupnpd.org'>here</a>.
+
+<h3>Donate</h3>
+<a href="https://www.paypal.me/clark15b">www.paypal.me/clark15b</a>
+
+<h2>pshare UPnP Playlist Browser</h2>
+
+<u>xupnpd is a new pshare, use <a href='http://xupnpd.org'>xupnpd</a></u><br><br>
+
+This program is a light <a href='http://upnp.org/specs/av/av1'>DLNA</a> Media Server which provides <a href='http://upnp.org/specs/av/UPnP-av-ContentDirectory-v1-Service.pdf'>ContentDirectory:1</a> service<br>
+for sharing <a href='http://en.wikipedia.org/wiki/IPTV'>IPTV</a> unicast streams over local area network (with '<a href='http://sourceforge.net/projects/udpxy'>udpxy</a>' for multicast to HTTP unicast conversion).<br><br>
+
+The program shares <a href='http://en.wikipedia.org/wiki/Utf8'>UTF8-encoded</a> <a href='http://en.wikipedia.org/wiki/M3U'>M3U playlists</a> with links over local area network as content of the directory.<br><br>
+
+You can watch <a href='http://en.wikipedia.org/wiki/HDTV'>HDTV</a> broadcasts (multicast or unicast) and listen Internet Radio in IP network without transcoding.<br><br>
+
+<u>Source code:</u> <a href='https://github.com/clark15b/pshare'>https://github.com/clark15b/pshare</a><br><br>
+
+<a href='img/pshare1.jpeg'><img src='img/120px-pshare1.jpeg' border=0></a>
+<a href='img/pshare2.jpeg'><img src='img/120px-pshare2.jpeg' border=0></a>
+<a href='img/pshare3.jpeg'><img src='img/120px-pshare3.jpeg' border=0></a><br>
+<a href='img/pshare4.jpeg'><img src='img/120px-pshare4.jpeg' border=0></a>
+<a href='img/pshare5.jpeg'><img src='img/120px-pshare5.jpeg' border=0></a>
+<a href='img/pshare6.jpeg'><img src='img/120px-pshare6.jpeg' border=0></a><br><br>
+<iframe width="420" height="315" src="https://www.youtube.com/embed/yBqF-WKL8tk" frameborder="0" allowfullscreen></iframe><br>
+(Sony <a href='http://en.wikipedia.org/wiki/PlayStation_3'>PlayStation3</a> as <a href='http://en.wikipedia.org/wiki/Set-top_box'>Set-top box</a>)
+<br><br>
+
+<script type="text/javascript"><!--
+google_ad_client = "ca-pub-8299725827970601";
+/* ps3muxer-336 */
+google_ad_slot = "2034303144";
+google_ad_width = 336;
+google_ad_height = 280;
+//-->
+</script>
+<script type="text/javascript"
+src="http://pagead2.googlesyndication.com/pagead/show_ads.js">
+</script>
+<br><br>
+
+PShare works in a <a href='http://openwrt.org'>OpenWRT</a> and <a href='http://www.dd-wrt.com'>DD-WRT</a> Linux devices.<br><br>
+
+Multicast <a href='http://en.wikipedia.org/wiki/IPTV'>IPTV</a> without transcoding (pshare+udpxy) was tested with:
+<ul>
+<li>Ubuntu 10.04 (Linux, IA-32) as Media Server</li>
+<li>D-Link DIR-320 (DD-WRT v24 preSP2 13064, mipsel) as Media Server</li>
+<li>ASUS WL-500gP as Media Server</li>
+<li>Sony PlayStation 3 as UPnP player</li>
+<li>IconBit HDS4L as UPnP player</li>
+<li>Microsoft Media Player 11 as player<br><br>
+<li>Ubuntu 10.04 with VideoLAN as UPnP player</li>
+</ul>
+
+<u>USAGE:</u> ./pshare [-v] [-l] [-i iface] [-u device_uuid] [-t mcast_ttl] [-p http_port] [-r www_root] [playlist]<br><br>
+<table border=0>
+<tr><td>-v</td><td>- Turn on verbose output</td></tr>
+<tr><td>-d</td><td>- Turn on verbose output + debug messages</td></tr>
+<tr><td>-l</td><td>- Turn on loopback multicast transmission</td></tr>
+<tr><td>-i</td><td>- Multicast interface address or device name</td></tr>
+<tr><td>-u</td><td>- DLNA server UUID</td></tr>
+<tr><td>-n</td><td>- DLNA server friendly name</td></tr>
+<tr><td>-t</td><td>- Multicast datagrams time-to-live (TTL)</td></tr>
+<tr><td>-p</td><td>- TCP port for incoming HTTP connections</td></tr>
+<tr><td>-r</td><td>- WWW root directory (default: '/opt/share/pshare/www')</td></tr>
+<tr><td>playlist</td><td>- single file or directory with utf8-encoded *.m3u files (default: '/opt/share/pshare/playlists')</td></tr>
+</table>
+
+<br><br>
+<u>Examples:</u>
+<ul>
+<li>'./pshare -i eth0 playlist.m3u'</li>
+<li>'./pshare -i 192.168.1.1 -u 32ccc90a-27a7-494a-a02d-71f8e02b1937 -n IPTV -t 1 -p 4044 playlists/'</li>
+<li>'./pshare -v'</li>
+</ul>
+
+<br>
+
+<u>M3U8 playlist example:</u><br>
+<p style='font-size: 10pt' align=left>
+#EXTM3U<br>
+#EXTINF:0,TV channel 1<br>
+http://192.168.1.1:4022/udp/234.5.2.1:20000<br>
+#EXTINF:0,TV channel 2<br>
+http://192.168.1.1:4022/udp/234.5.2.2:20000/stream.mpeg<br>
+#EXTINF:0,TV channel 3<br>
+http://192.168.1.1:4022/udp/234.5.2.3:20000/stream.mpeg2<br>
+#EXTINF:0,TV channel 4<br>
+http://192.168.1.1:4022/udp/234.5.2.4:20000/stream.m2ts<br>
+#EXTINF:0,TV channel 5<br>
+http://192.168.1.1:4022/udp/234.5.2.5:20000/stream.vob<br>
+#EXTINF:0,TV channel 4<br>
+http://192.168.1.1:4022/udp/234.5.2.6:20000/stream.avi<br>
+#EXTINF:0,TV channel 6<br>
+http://192.168.1.1:4022/udp/234.5.2.7:20000/stream.asf<br>
+#EXTINF:0,TV channel 7<br>
+http://192.168.1.1:4022/udp/234.5.2.8:20000/stream.wmv<br>
+#EXTINF:0,TV channel 8<br>
+http://192.168.1.1:4022/udp/234.5.2.9:20000/stream.mov<br>
+#EXTINF:0,TV channel 9<br>
+http://192.168.1.1:4022/udp/234.5.2.10:20000/stream.mp4<br>
+#EXTINF:0,Radio channel 10<br>
+http://internet.radio.com/stream.mp3<br>
+#EXTINF:0,Radio channel 11<br>
+http://internet.radio.com/stream.aac<br>
+#EXTINF:0,Radio channel 12<br>
+http://internet.radio.com/stream.ac3<br>
+#EXTINF:0,Radio channel 13<br>
+http://internet.radio.com/stream.ogg<br>
+#EXTINF:0,Radio channel 14<br>
+http://internet.radio.com/stream.wma<br>
+</p><br>
+
+
+Try <a href='http://xupnpd.org/ps3muxer'>PS3Muxer</a> for remux HD movies (MKV=>M2TS).
+
+<br><br><br>
+<p style='font-size: 8pt' align=right>
+<b>License</b>: <a href='https://github.com/clark15b/pshare/blob/master/LICENSE'>GPL</a><br>
+Copyright (C) 2011-2015 Anton Burdinuk<br>
+E-Mail: <a href='mailto:clark15b@gmail.com'>clark15b@gmail.com</a><br>
+</p>
+
+</body>
+</html>
