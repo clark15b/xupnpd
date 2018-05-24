@@ -1,0 +1,163 @@
+<html>
+<head>
+<title>Lua server pages - doc</title>
+<meta keywords='lsp,lua,luasp,openlsp,examples,doc,manual,info'>
+<meta description='Lua Server Pages is an easy open source scripting language that follows the PHP syntax'>
+</head>
+<body>
+
+<table border=0>
+
+<tr><td valign=top width=150><a href='http://www.lua.org'><img src='logo.gif' border=0></a></td>
+
+<td>
+<h2>Manual</h2>
+<h3>Global functions:</h3>
+<ul>
+	<li><i>module_version()</i> - return module version;
+	<li><i>dofile_lsp(filename)</i> - load and execute lsp file;
+	<li><i>url_decode(string)</i>;
+	<li><i>args_decode(string)</i>;
+	<li><i>echo(...)</i> - print values without CRLF;
+	<li><i>log(string)</i> - write message to system log (or apache error log);
+	<li><i>content_type(string)</i> - set content type for output data (call before starting output);
+	<li><i>set_out_header(name,value)</i> - add or change output HTTP header (call before starting output);
+	<li><i>get_in_header(name)</i> - return input HTTP header;
+	<li><i>uuid_gen()</i> - return new uuid.
+	
+</ul>
+
+<h3>Global tables:</h3>
+<ul>
+	<li><i>_G.env</i> - contain global request information;
+	<li><i>_G.args</i> - contain GET parameters;
+	<li><i>_G.args_post</i> - contain POST parameters (if request method = POST and Content-Type = application/x-form-urlencoded).
+</ul>
+
+<h3>'env' table fields:</h3>
+<ul>
+	<li><i>_G.env.server_admin</i>
+	<li><i>_G.env.server_hostname</i>
+	<li><i>_G.env.remote_ip</i>
+	<li><i>_G.env.remote_host</i>
+	<li><i>_G.env.local_ip</i>
+	<li><i>_G.env.local_host</i>
+	<li><i>_G.env.hostname</i>
+	<li><i>_G.env.method</i> - request method;
+	<li><i>_G.env.handler</i> - apache2 handler name;
+	<li><i>_G.env.uri</i> - current URI;
+	<li><i>_G.env.filename</i> - full path to corrent script file;
+	<li><i>_G.env.args</i> - unparsed GET parameters;
+	<li><i>_G.env.content</i> - posted content body (if request method = POST and Content-Type &lt;> application/x-form-urlencoded);
+	<li><i>_G.env.session</i> - user unique session id.
+</ul>
+
+
+<h3>MySQL functions:</h3>
+<ul>
+	<li><i>mysql.open(condata,dbase)</i> - open new connection to MySQL database and return &lt;connection>, condata contain 'user:pass@localhost';
+	<li><i>mysql.escape(&lt;connection>,string)</i> - escape string for safe usage in statements;
+	<li><i>mysql.affected_rows(&lt;connection>)</i> - return number of affected rows after UPDATE;
+	<li><i>mysql.insert_id(&lt;connection>)</i> - return value of AUTO_INCREMENT field after INSERT;
+	<li><i>mysql.query(&lt;connection>,stmt)</i> - execute SQL statement and return &lt;rowset>;
+	<li><i>mysql.fields_count(&lt;rowset>)</i> - return fields number in rowset;
+	<li><i>mysql.rows(&lt;rowset>)</i> - return iterator for access to one row at time (row is a lua table), see io.lines;
+	<li><i>mysql.table(&lt;rowset>)</i> - return all rows as lua table of tables.
+</ul>
+
+<h3>CURL functions:</h3>
+<ul>
+	<li><i>curl.proxy(string)</i> - set proxy server;
+	<li><i>curl.log_file(path)</i> - set file name for trace (dangerous);
+	<li><i>curl.timeout(sec)</i> - set I/O timeout (seconds);
+	<li><i>curl.open(method,url)</i> - open and return new &lt;connection>, method - 'GET' or 'POST';
+	<li><i>curl.escape(&lt;connection>)</i> - escape string for safe usage in requests (urlencode);
+	<li><i>curl.send(&lt;connection>[,content])</i> - send request and return server response body ([content] for POST only);
+	<li><i>curl.status(&lt;connection>)</i> - return HTTP status code (200 if OK, 0 - if I/O error);
+	<li><i>curl.set_request_header(&lt;connection>,name,value)</i> - add or change request HTTP header.
+</ul>
+
+<h3>JSON functions:</h3>
+<ul>
+	<li><i>json.no_unicode_escape(flag)</i> - disable UTF8 to Unicode encoding feature (flag = 1);
+	<li><i>json.encode(...)</i> - encode values and return as string;
+	<li><i>json.decode(string)</i> - decode string and return values (\uXXXX decode to UTF8).
+</ul>
+
+<h3>memcached functions:</h3>
+<ul>
+	<li><i>mcache.open(address)</i> - open and return new &lt;connection> to memcached, address can contain 'host:port' or '/path/to/unix/socket';
+	<li><i>mcache.set(&lt;connection>,key,value[,expires]</i> - store string value (expires in seconds);
+	<li><i>mcache.get(&lt;connection>,key)</i> - return value by key;
+	<li><i>mcache.del(&lt;connection>,key)</i> - delete value by key.
+</ul>
+
+<h2>Examples</h2>
+
+<pre>
+<code>
+&lt;?# This is comment ?>
+
+&lt;html>
+&lt;head>&lt;title>Hello from luasp&lt;/title>&lt;/head>
+
+&lt;body>
+
+Session: &lt;?=env.session?>&lt;br>
+
+&lt;?print('Your IP address: '..env.remote_ip)?>&lt;br>
+
+URI: &lt;?=env.uri?>&lt;br>
+
+&lt;/body>
+
+&lt;/html>
+
+</code>
+</pre>
+
+
+<ul>
+	<li><a href='simple.txt'>simple.lsp</a>
+	<li><a href='example.txt'>example.lsp</a>
+</ul>
+
+
+</td></tr>
+</table>
+
+
+
+<br>
+
+<script async src="//pagead2.googlesyndication.com/pagead/js/adsbygoogle.js"></script>
+<!-- luasp-728-bottom -->
+<ins class="adsbygoogle"
+     style="display:inline-block;width:728px;height:90px"
+          data-ad-client="ca-pub-8299725827970601"
+               data-ad-slot="3041424843"></ins>
+               <script>
+               (adsbygoogle = window.adsbygoogle || []).push({});
+               </script>
+
+
+<p style='font-size: 8pt' align=right>
+<b>License</b>: <a href='https://github.com/clark15b/luasp/blob/master/LICENSE'>BSD</a><br>
+Copyright (C) 2011-2015 Anton Burdinuk<br> 
+E-Mail: <a href='mailto:clark15b@gmail.com'>clark15b@gmail.com</a>
+
+<br><br><br>
+
+</p>
+</body>
+
+<script type="text/javascript">
+var gaJsHost = (("https:" == document.location.protocol) ? "https://ssl." : "http://www.");
+document.write(unescape("%3Cscript src='" + gaJsHost + "google-analytics.com/ga.js' type='text/javascript'%3E%3C/script%3E"));
+</script>
+<script type="text/javascript">
+var pageTracker = _gat._getTracker("UA-5815669-1");
+pageTracker._trackPageview();
+</script>
+
+</html>
