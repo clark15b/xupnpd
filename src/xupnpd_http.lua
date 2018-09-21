@@ -101,12 +101,12 @@ end
 
 function http_send_headers(err,ext,len)
 
-	http_cahce= {}
-	http_cahce['jpg']='max-age=3600'
-	http_cahce['png']='max-age=3600'
-	http_cahce['ico']='max-age=3600'
-	http_cahce['css']='max-age=3600'
-	http_cahce['js']='max-age=3600'
+	http_cache= {}
+	http_cache['jpg']='max-age=3600'
+	http_cache['png']='max-age=3600'
+	http_cache['ico']='max-age=3600'
+	http_cache['css']='max-age=3600'
+	http_cache['js']='max-age=3600'
 	http_mime['svg']='max-age=3600'
 	http_mime['eot']='max-age=3600'
 	http_mime['woff']='max-age=3600'
@@ -129,7 +129,7 @@ function http_send_headers(err,ext,len)
 			string.format(
 				'Cache-control: %s\r\n'..
 				'Content-Type: %s\r\nEXT:\r\n',
-					http_cahce[ext] or 'no-cache',
+					http_cache[ext] or 'no-cache',
 					http_mime[ext] or 'application/x-octet-stream'
 			 )
 		)
