@@ -101,12 +101,12 @@ end
 
 function http_send_headers(err,ext,len)
 
-	http_cahce= {}
-	http_cahce['jpg']='max-age=3600'
-	http_cahce['png']='max-age=3600'
-	http_cahce['ico']='max-age=3600'
-	http_cahce['css']='max-age=3600'
-	http_cahce['js']='max-age=3600'
+	http_cache= {}
+	http_cache['jpg']='max-age=3600'
+	http_cache['png']='max-age=3600'
+	http_cache['ico']='max-age=3600'
+	http_cache['css']='max-age=3600'
+	http_cache['js']='max-age=3600'
 	http_mime['svg']='max-age=3600'
 	http_mime['eot']='max-age=3600'
 	http_mime['woff']='max-age=3600'
@@ -129,7 +129,7 @@ function http_send_headers(err,ext,len)
 			string.format(
 				'Cache-control: %s\r\n'..
 				'Content-Type: %s\r\nEXT:\r\n',
-					http_cahce[ext] or 'no-cache',
+					http_cache[ext] or 'no-cache',
 					http_mime[ext] or 'application/x-octet-stream'
 			 )
 		)
@@ -313,7 +313,7 @@ function http_handler(what,from,port,msg)
             http_send_headers(404)
         else
             dofile(http_ui_main)
-            ui_handler(f.args,msg.data or '',from_ip,f.url,msg.reqline[1])
+            ui_handler(f.args,msg.data or '',from_ip,f.url,msg.reqline[1],msg['cookie'])
         end
         return
     elseif string.find(f.url,'^/app/?') then
@@ -521,12 +521,12 @@ function http_handler(what,from,port,msg)
     elseif url=='sub' then
 
         local srt = string.format("%s.srt", object)
-	local pls=nil
-	object = string.format("%s_", object)
-	while object:len() > 0 and (not pls or not pls.path) do
-           object = object:gsub("_[^_]*$", "")
-           pls=find_playlist_object(object)
-	end
+        local pls=nil
+        object = string.format("%s_", object)
+        while object:len() > 0 and (not pls or not pls.path) do
+            object = object:gsub("_[^_]*$", "")
+            pls=find_playlist_object(object)
+        end
 
         if not pls or not pls.path then http_send_headers(404) return end
 
