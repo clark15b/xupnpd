@@ -21,6 +21,13 @@ mkdir -p $CONTENTS/plugins/skel
 mkdir -p $CONTENTS/profiles
 mkdir -p $CONTENTS/profiles/skel
 mkdir -p $CONTENTS/ui
+mkdir -p $CONTENTS/ui/css
+mkdir -p $CONTENTS/ui/fonts
+mkdir -p $CONTENTS/ui/js
+mkdir -p $CONTENTS/ui/js/app
+mkdir -p $CONTENTS/ui/js/app/PlayList
+mkdir -p $CONTENTS/ui/js/app/Status
+mkdir -p $CONTENTS/ui/js/override
 mkdir -p $CONTENTS/www
 
 cp control $DEBIAN
@@ -39,6 +46,18 @@ cp $SRC/ui/*.lua $CONTENTS/ui/
 cp $SRC/ui/*.css $CONTENTS/ui/
 cp $SRC/ui/*.html $CONTENTS/ui/
 cp $SRC/ui/*.txt $CONTENTS/ui/
+cp $SRC/ui/css/*.css $CONTENTS/ui/css/
+cp $SRC/ui/fonts/*.otf $CONTENTS/ui/fonts
+cp $SRC/ui/fonts/*.svg $CONTENTS/ui/fonts
+cp $SRC/ui/fonts/*.ttf $CONTENTS/ui/fonts
+cp $SRC/ui/fonts/*.eot $CONTENTS/ui/fonts
+cp $SRC/ui/fonts/*.woff $CONTENTS/ui/fonts
+cp $SRC/ui/fonts/*.woff2 $CONTENTS/ui/fonts
+cp $SRC/ui/js/*.js $CONTENTS/ui/js
+cp $SRC/ui/js/app/*.js $CONTENTS/ui/js/app
+cp $SRC/ui/js/app/PlayList/*.js $CONTENTS/ui/js/app/PlayList
+cp $SRC/ui/js/app/Status/*.js $CONTENTS/ui/js/app/Status
+cp $SRC/ui/js/override/*.js $CONTENTS/ui/js/override
 cp $SRC/www/*.html $CONTENTS/www/
 cp $SRC/www/*.xml $CONTENTS/www/
 cp $SRC/www/*.mp4 $CONTENTS/www/
