@@ -32,21 +32,18 @@ x86:
 ifeq ($(SYSTEMLUA),false)
 	$(MAKE) -C $(LUA) CC=$(CC) a
 endif
-	$(CC) -O2 -c -o md5.o md5c.c
-	$(CC) $(CFLAGS) -DWITH_LIBUUID -D_LARGEFILE_SOURCE -D_FILE_OFFSET_BITS=64 -o xupnpd $(SRC) md5.o $(LUALIBS) -ldl -lm -luuid -lssl -lcrypto
+	$(CC) $(CFLAGS) -DWITH_LIBUUID -D_LARGEFILE_SOURCE -D_FILE_OFFSET_BITS=64 -o xupnpd $(SRC) $(LUALIBS) -ldl -lm -luuid -lssl -lcrypto
 	strip xupnpd
 
 # Cygwin
 x86win:
 	$(MAKE) -C $(LUA) CC=$(CC) a
-	$(CC) -O2 -c -o md5.o md5c.c
-	$(CC) $(CFLAGS) -DWITH_LIBUUID -D_LARGEFILE_SOURCE -D_FILE_OFFSET_BITS=64 -D_UNDER_WIN -o xupnpd $(SRC) md5.o -llua -ldl -lm -luuid -lssl -lcrypto
+	$(CC) $(CFLAGS) -DWITH_LIBUUID -D_LARGEFILE_SOURCE -D_FILE_OFFSET_BITS=64 -D_UNDER_WIN -o xupnpd $(SRC) -llua -ldl -lm -luuid -lssl -lcrypto
 	strip xupnpd
 
 x86_bsd:
 	$(MAKE) -C $(LUA) CC=$(CC) a
-	$(CC) -O2 -c -o md5.o md5c.c
-	$(CC) $(CFLAGS) -DINET -DWITH_LIBUUID -o xupnpd $(SRC) md5.o -llua -lm -lssl -lcrypto
+	$(CC) $(CFLAGS) -DINET -DWITH_LIBUUID -o xupnpd $(SRC) -llua -lm -lssl -lcrypto
 	strip xupnpd
 
 
@@ -101,8 +98,7 @@ dreambox:
 
 embedded:
 	PATH=$(PATH):$(UTILS) $(MAKE) -C $(LUA) CC=$(SDK)/gcc a MYCFLAGS='$(LUAMYCFLAGS)'
-	$(SDK)/gcc -O2 -c -B$(UTILS) -o md5.o md5c.c
-	$(SDK)/gcc $(CFLAGS) -B$(UTILS) -DWITH_URANDOM -o xupnpd-$(TARGET) $(SRC) md5.o -llua -lm -ldl -lssl -lcrypto
+	$(SDK)/gcc $(CFLAGS) -B$(UTILS) -DWITH_URANDOM -o xupnpd-$(TARGET) $(SRC) -llua -lm -ldl -lssl -lcrypto
 	$(SDK)/strip xupnpd-$(TARGET)
 
 clean:
@@ -110,4 +106,3 @@ ifeq ($(SYSTEMLUA),false)
 	$(MAKE) -C $(LUA) clean
 	rm -f $(LUA)/liblua.a
 endif
-	rm -f md5.o
