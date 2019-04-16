@@ -1,9 +1,20 @@
-LUA     = lua-5.1.4
-#LUA     = lua-5.2.0
+SYSTEMLUA ?= false
 STATIC  = false
 OPENSSL = /home/user/src/openssl-0.9.8e
 
-CFLAGS  = -fno-exceptions -fno-rtti -O2 -I$(LUA) -L$(LUA)
+CFLAGS  = -fno-exceptions -fno-rtti -O2
+
+ifeq ($(SYSTEMLUA),false)
+LUA = lua-5.1.4
+#LUA = lua-5.2.0
+CFLAGS+=-I$(LUA) -L$(LUA)
+LUALIBS = -llua
+else
+LUA = lua51
+CFLAGS+=$(shell pkg-config --cflags $(LUA))
+LUALIBS = $(shell pkg-config --libs $(LUA))
+endif
+
 CFLAGS+= -I$(OPENSSL)/include -L$(OPENSSL)/lib/openwrt
 SRC     = main.cpp soap.cpp mem.cpp mcast.cpp luaxlib.cpp luaxcore.cpp luajson.cpp luajson_parser.cpp
 LUAMYCFLAGS = -DLUA_USE_LINUX
@@ -18,9 +29,11 @@ LUAMYCFLAGS+=-static
 endif
 
 x86:
+ifeq ($(SYSTEMLUA),false)
 	$(MAKE) -C $(LUA) CC=$(CC) a
+endif
 	$(CC) -O2 -c -o md5.o md5c.c
-	$(CC) $(CFLAGS) -DWITH_LIBUUID -D_LARGEFILE_SOURCE -D_FILE_OFFSET_BITS=64 -o xupnpd $(SRC) md5.o -llua -ldl -lm -luuid -lssl -lcrypto
+	$(CC) $(CFLAGS) -DWITH_LIBUUID -D_LARGEFILE_SOURCE -D_FILE_OFFSET_BITS=64 -o xupnpd $(SRC) md5.o $(LUALIBS) -ldl -lm -luuid -lssl -lcrypto
 	strip xupnpd
 
 # Cygwin
@@ -93,6 +106,8 @@ embedded:
 	$(SDK)/strip xupnpd-$(TARGET)
 
 clean:
+ifeq ($(SYSTEMLUA),false)
 	$(MAKE) -C $(LUA) clean
 	rm -f $(LUA)/liblua.a
+endif
 	rm -f md5.o
