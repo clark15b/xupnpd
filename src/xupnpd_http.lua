@@ -590,6 +590,15 @@ function http_handler(what,from,port,msg)
             http.send('Accept-Ranges: none\r\n')
         end
 
+        if "1" == msg['getcaptioninfo.sec'] and pls.path then
+            for i, n in ipairs(util.dir(pls.path:sub(1, pls.path:len() - pls.url:len()))) do
+                if n:sub(n:len() - 4+1) == ".srt" then
+                    http.send(string.format('CaptionInfo.sec: %s/sub/%s.srt\r\n', www_location,pls.objid))
+                    break
+                end
+            end
+        end
+
         if cfg.dlna_headers==true then http.send('TransferMode.DLNA.ORG: Streaming\r\nContentFeatures.DLNA.ORG: '..extras..'\r\n') end
 
         if cfg.content_disp==true then
