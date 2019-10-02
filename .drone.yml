@@ -9,6 +9,7 @@ steps:
     - git clone -b test_name_in_before_and_after https://github.com/samunders-core/roundup.git
     - cd roundup
     - ./configure
+    - make
     - make install
     - cd ../src
     - make test
