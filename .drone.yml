@@ -11,6 +11,7 @@ steps:
     - ./configure
     - make
     - make install
+    - sed -i -re '1s|/[^/]*sh$|/bash|' /usr/local/bin/roundup
     - cd ../src
     - make test
 
