@@ -1,0 +1,15 @@
+kind: pipeline
+name: tests
+
+steps:
+- name: compile
+  image: alpine:latest
+  commands:
+    - apk add bash build_base libuuid openssl
+    - cd src
+    - make test
+
+trigger:
+  event:
+    - pull_request
+    - push
