@@ -2,7 +2,7 @@
 
 before() {
   export SRC_DIR="$(pwd)/../../src"
-  export XUPNPDROOTDIR=`mktemp -d --tmpdir "${1:-tmp}.XXX"`
+  export XUPNPDROOTDIR=`mktemp -d -p "${1:-tmp}.XXX"`
   pushd "$XUPNPDROOTDIR"
   mkdir localmedia plugins profiles
   cp "$SRC_DIR/plugins/xupnpd_$(basename ${BASH_SOURCE%-test.sh})" plugins
