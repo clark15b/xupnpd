@@ -5,10 +5,11 @@ steps:
 - name: compile_and_test
   image: alpine:latest
   commands:
-    - apk add bash build-base openssl-dev util-linux-dev # util-linux-dev contains uuid/uuid.h
-    - wget -O /usr/bin/roundup https://raw.githubusercontent.com/samunders-core/roundup/test_name_in_before_and_after/roundup.sh
-    - chmod +x /usr/bin/roundup
-    - cd src
+    - apk add bash build-base git openssl-dev util-linux-dev # util-linux-dev contains uuid/uuid.h
+    - git clone -b test_name_in_before_and_after https://github.com/samunders-core/roundup.git
+    - cd roundup
+    - make install
+    - cd ../src
     - make test
 
 trigger:
