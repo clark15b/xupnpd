@@ -5,7 +5,7 @@ steps:
 - name: compile
   image: alpine:latest
   commands:
-    - apk add bash build_base libuuid openssl
+    - apk add bash build-base libuuid openssl
     - cd src
     - make test
 
