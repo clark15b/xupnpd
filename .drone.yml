@@ -8,6 +8,7 @@ steps:
     - apk add bash build-base git openssl-dev util-linux-dev # util-linux-dev contains uuid/uuid.h
     - git clone -b test_name_in_before_and_after https://github.com/samunders-core/roundup.git
     - cd roundup
+    - ./configure
     - make install
     - cd ../src
     - make test
