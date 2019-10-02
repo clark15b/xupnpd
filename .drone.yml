@@ -2,10 +2,12 @@ kind: pipeline
 name: tests
 
 steps:
-- name: compile
+- name: compile_and_test
   image: alpine:latest
   commands:
     - apk add bash build-base openssl-dev util-linux-dev # util-linux-dev contains uuid/uuid.h
+    - wget -O /usr/bin/roundup https://raw.githubusercontent.com/samunders-core/roundup/test_name_in_before_and_after/roundup.sh
+    - chmod +x /usr/bin/roundup
     - cd src
     - make test
 
