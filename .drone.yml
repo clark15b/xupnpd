@@ -5,7 +5,7 @@ steps:
 - name: compile_and_test
   image: alpine:latest
   commands:
-    - apk add bash build-base git openssl-dev util-linux-dev # util-linux-dev contains uuid/uuid.h
+    - apk add bash build-base coreutils curl git openssl-dev util-linux-dev # stdbuf in coreutils, uuid/uuid.h in util-linux-dev
     - git clone -b test_name_in_before_and_after https://github.com/samunders-core/roundup.git
     - cd roundup
     - ./configure
