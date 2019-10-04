@@ -5,7 +5,7 @@ before() {
   export XUPNPDROOTDIR=`mktemp -d -t "${1:-tmp}.XXXXXX"`
   pushd "$XUPNPDROOTDIR"
   mkdir localmedia plugins profiles
-  cp "$SRC_DIR/plugins/xupnpd_$(basename ${BASH_SOURCE%-test.sh})" plugins
+  cp "$SRC_DIR/plugins/xupnpd_$(basename ${BASH_SOURCE%-test.sh})" plugins		# luckily roundup also assumes bash
   cp "$SRC_DIR"/*.lua .
   sed -i -re 's^--(.*[.]/localmedia.*)^\1^' -e "s/UPnP-IPTV/$(basename ${XUPNPDROOTDIR%.*})/" xupnpd.lua
 }
@@ -24,7 +24,7 @@ http() {	# /url_path?query [curl args]
 }
 
 after() {
-  pkill xupnpd || true		# $! is empty :-(
+  pkill xupnpd || true		# $! is empty :-(; true prevents failure on synchronous tests
   TMP_DIR=`dirs +0`
   popd
   rm -r "$TMP_DIR"
