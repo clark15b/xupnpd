@@ -25,10 +25,13 @@ function profile_change(user_agent,req)
     plugins.profiles.current = nil
 end
 
-plugins['profiles'] = {
+local this = {
 	disabled = false,
 	name = 'profiles',
 	desc = 'enables per-user-agent response customizations',
+	apply_config = function()
+		load_plugins(cfg.profiles or "./profiles/",'profile')
+	end,
 	http_handler = function(what,from,port,msg)
 		profile_change(msg['user-agent'], msg)
 	end,
@@ -42,6 +45,4 @@ plugins['profiles'] = {
 	ui_vars = {}	-- use whatever ${key} in UI HTML templates
 }
 
-if not plugins.profiles.disabled then
-	load_plugins(cfg.profiles or "./profiles/",'profile')
-end
+plugins[this.name] = this

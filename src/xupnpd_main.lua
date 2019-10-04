@@ -33,6 +33,7 @@ function load_plugins(path,what)
     local d=util.dir(path)
 
     if d then
+    	table.sort(d)	# ensure stable loading order
         for i,n in ipairs(d) do
             if string.find(n,'^[%w_-]+%.lua$') then
                 if cfg.debug>0 then print(what..' \''..n..'\'') end
