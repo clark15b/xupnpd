@@ -1,7 +1,7 @@
 #!/usr/bin/env roundup
 
 before() {
-  export SRC_DIR="$(pwd)/../../src"
+  export SRC_DIR="$(pwd)/../src"
   export XUPNPDROOTDIR=`mktemp -d -t "${1:-tmp}.XXXXXX"`
   pushd "$XUPNPDROOTDIR"
   mkdir localmedia plugins profiles
@@ -44,6 +44,31 @@ it_changes_profile_per_user_agent() {
 
   xupnpd &
   
-  http stream/0_1_1.avi --head --user-agent 'profile1' | awk '$0 ~ "Content-Type: video/avi"{found=1} {print} END{exit(1 - found)}'
-  http stream/0_1_1.avi --head --user-agent 'profile2' | awk '$0 ~ "Content-Type: text/html"{found=1} {print} END{exit(1 - found)}'
+  http stream/0_1_1.avi --head --user-agent 'profile1' | lookup "Content-Type: video/avi"
+  http stream/0_1_1.avi --head --user-agent 'profile2' | lookup "Content-Type: text/html"
+}
+
+it_uses_configurable_path() {
+  mkdir custom_profiles_dir
+  sed -re 's/Skeleton/profile1/' -e '/disabled/d' -e 's/User-Agent of Device/profile1/' -e 's^video/avi^text/html^' "$SRC_DIR"/profiles/skel/skel.lua > custom_profiles_dir/profile1.lua
+  sed -i -re "s|^(cfg[.]profiles\s*=\s*')[^']*('.*)|\1./custom_profiles_dir/\2|" xupnpd.lua
+  touch localmedia/0_1_1.avi
+  
+  xupnpd &
+  
+  http stream/0_1_1.avi --head --user-agent 'profile1' | lookup "Content-Type: text/html"
+}
+
+it_uses_ui_entered_path() {
+  mkdir custom_profiles_dir
+  sed -re 's/Skeleton/profile2/' -e '/disabled/d' -e 's/User-Agent of Device/profile2/' -e 's^video/avi^text/html^' "$SRC_DIR"/profiles/skel/skel.lua > custom_profiles_dir/profile2.lua
+  touch localmedia/0_1_1.avi
+  
+  xupnpd &
+  
+  http stream/0_1_1.avi --head --user-agent 'profile1' | lookup "Content-Type: video/avi"
+  
+  echo "profiles=./custom_profiles_dir/" | http ui/apply --data-binary '@-'
+  
+  http stream/0_1_1.avi --head --user-agent 'profile2' | lookup "Content-Type: text/html"
 }
