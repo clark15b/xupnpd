@@ -3,7 +3,7 @@ name: tests
 
 steps:
 - name: compile_and_test
-  image: alpine:latest
+  image: alpine:3.9		# 3.10 uses bash-5.0.x
   commands:
     - apk add bash build-base coreutils curl git ncurses openssl-dev util-linux-dev # stdbuf in coreutils, tput in ncurses, uuid/uuid.h in util-linux-dev
     - git clone -b test_name_in_before_and_after https://github.com/samunders-core/roundup.git
@@ -12,7 +12,7 @@ steps:
     - make
     - make install
     - sed -i -re '1s|/[^/]*sh$|/bash|' /usr/local/bin/roundup
-    - cd ../xupnpd/src
+    - cd ../src
     - make test
 
 trigger:
