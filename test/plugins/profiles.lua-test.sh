@@ -21,7 +21,7 @@ lookup() {	# regex; like grep, but prints first match on success, everything whe
 
 http() {	# /url_path?query [curl args]
   URL="$1" && shift
-  curl --silent --retry 5 --retry-connrefused --retry-delay 1 "$@" "http://localhost:4044/${URL#/}"
+  curl --silent -4 --retry 5 --retry-connrefused --retry-delay 1 "$@" "http://localhost:4044/${URL#/}"
 }
 
 after() {
