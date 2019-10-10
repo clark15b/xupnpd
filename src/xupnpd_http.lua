@@ -278,10 +278,16 @@ function http_handler(what,from,port,msg)
     if not msg or not msg.reqline then return end
 
     local pr_name=nil
+    
+    for plugin_name,plugin in pairs(plugins) do
+        if plugin.http_handler and not plugin.disabled then
+            plugin.http_handler(what,from,port,msg)
+        end
+    end
 
-    if cfg.profiles then
-        pr_name=profile_change(msg['user-agent'],msg)
-
+    if plugins.profiles and not plugins.profiles.disabled then
+    	pr_name=plugins.profiles.current
+    	
         if msg.reqline[2]=='/dev.xml' then msg.reqline[2]=cfg.dev_desc_xml end
     end
 
