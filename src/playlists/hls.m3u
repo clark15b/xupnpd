@@ -1,7 +1,7 @@
 #EXTM3U name="TV" plugin=hls
 
 #EXTINF:0, TV Halle
-http://62.113.210.250/medienasa-live/_definst_/mp4:tvhalle_high/playlist.m3u8
+http://62.113.210.250/medienasa-live/_definst_/mp4:tvhalle_high/chunklist_w1678411270.m3u8
 
 #EXTINF:0, Студия Говорит Москва
-http://video.govoritmoskva.ru:8080/live/rufmbk-1/index.m3u8
+http://video.govoritmoskva.ru:8080/live/rufmbk-1/tracks-v1a1/mono.m3u8

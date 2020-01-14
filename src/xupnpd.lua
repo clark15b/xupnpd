@@ -83,7 +83,7 @@ cfg.playlists_update_interval=0
 playlist=
 {
 --    { './playlists/mozhay.m3u', 'Mozhay.tv' },
-    { './localmedia', 'Local Media Files' }
+--    { './localmedia', 'Local Media Files' }
 --    { './private', 'Private Media Files', '127.0.0.1;192.168.1.1' }  -- only for 127.0.0.1 and 192.168.1.1
 }
 
