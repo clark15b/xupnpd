@@ -1,0 +1,13 @@
+# ar7xxx
+STAGING_DIR     = /opt/openwrt/ar7xxx
+BIN             = $(STAGING_DIR)/toolchain-mips_24kc_gcc-5.4.0_musl-1.1.16/bin
+LIBEXEC         = $(STAGING_DIR)/toolchain-mips_24kc_gcc-5.4.0_musl-1.1.16/libexec/gcc/mips-openwrt-linux-muslc/5.4.0
+CC              = $(BIN)/mips-openwrt-linux-gcc
+CPP             = $(BIN)/mips-openwrt-linux-gcc
+STRIP           = $(BIN)/mips-openwrt-linux-strip
+RM              = rm
+PLATFORM        = ar7xxx
+TARGET_DIR      = .
+MY_CFLAGS       =
+
+include rules.mk

@@ -29,7 +29,10 @@
 #include <netdb.h>
 #include <ctype.h>
 #include "compat.h"
+
+#ifndef WITHOUT_OPENSSL
 #include "openssl/ssl.h"
+#endif /* WITHOUT_OPENSSL */
 
 // HTML5
 // ACE Stream (http://torrent-tv.ru/)
@@ -56,8 +59,10 @@ namespace core
 
     char user_agent[256]="xupnpd";
 
-	SSL_CTX *ssl_ctx=NULL;
-	
+#ifndef WITHOUT_OPENSSL
+    SSL_CTX *ssl_ctx=NULL;
+#endif /* WITHOUT_OPENSSL */
+
     struct url_data
     {
         char host[128];
@@ -94,7 +99,10 @@ namespace core
 
     int connect(const char* s,int port);
     FILE* sock2file(int socket);
-	BIO* sock2bio(int socket, SSL* ssl);
+
+#ifndef WITHOUT_OPENSSL
+    BIO* sock2bio(int socket, SSL* ssl);
+#endif /* WITHOUT_OPENSSL */
 
     mcast::mcast_grp ssdp_mcast_grp;
     int ssdp_upstream=-1;
@@ -155,7 +163,7 @@ namespace core
         {
             listeners_end->next=l;
             listeners_end=l;
-        }        
+        }
 
         return 0;
     }
@@ -247,7 +255,7 @@ namespace core
                         tmp->next=e;
                         break;
                     }
-                }                
+                }
             }
         }
     }
@@ -1244,12 +1252,16 @@ static int lua_core_mainloop(lua_State* L)
 
     ssdp_done();
     listener_clear();
-	if (ssl_ctx != NULL) SSL_CTX_free(ssl_ctx);
+
+#ifndef WITHOUT_OPENSSL
+    if(ssl_ctx!=NULL)
+        SSL_CTX_free(ssl_ctx);
+#endif /* WITHOUT_OPENSSL */
 
     signal(SIGTERM,SIG_IGN);
     signal(SIGCHLD,SIG_IGN);
     kill(0,SIGTERM);
-                        
+
     for(int i=0;i<sizeof(__sig_pipe)/sizeof(*__sig_pipe);i++)
         close(__sig_pipe[i]);
     for(int i=0;i<sizeof(__event_pipe)/sizeof(*__event_pipe);i++)
@@ -1567,23 +1579,34 @@ FILE* core::sock2file(int socket) {
     return fp;
 }
 
-BIO* core::sock2bio(int socket, SSL* ssl) {
-	if (socket==0 || ssl==NULL) return NULL;
-    BIO* sbio;
-    BIO *buf_io;
-    BIO *ssl_bio;
-	sbio = BIO_new_socket(socket, BIO_NOCLOSE);
-	SSL_set_bio(ssl, sbio, sbio);
-    //SSL_set_fd (ssl, socket);
-	int err=SSL_connect(ssl);
-    buf_io = BIO_new(BIO_f_buffer());  /* create a buffer BIO */
-    ssl_bio = BIO_new(BIO_f_ssl());           /* create an ssl BIO */
-    BIO_set_ssl(ssl_bio, ssl, BIO_CLOSE);       /* assign the ssl BIO to SSL */
-    BIO_push(buf_io, ssl_bio);          /* add ssl_bio to buf_io */ 
-	//fbio = BIO_new(BIO_f_buffer());
-	//BIO_push(fbio, sbio); 
+#ifndef WITHOUT_OPENSSL
+BIO* core::sock2bio(int socket,SSL* ssl)
+{
+    if(socket==0 || ssl==NULL)
+        return NULL;
+
+    BIO* sbio=BIO_new_socket(socket,BIO_NOCLOSE);
+
+    SSL_set_bio(ssl,sbio,sbio);
+
+    //SSL_set_fd(ssl,socket);
+
+    int err=SSL_connect(ssl);
+
+    BIO* buf_io=BIO_new(BIO_f_buffer());        /* create a buffer BIO */
+
+    BIO* ssl_bio=BIO_new(BIO_f_ssl());          /* create an ssl BIO */
+
+    BIO_set_ssl(ssl_bio,ssl,BIO_CLOSE);         /* assign the ssl BIO to SSL */
+
+    BIO_push(buf_io,ssl_bio);                   /* add ssl_bio to buf_io */ 
+
+    //fbio=BIO_new(BIO_f_buffer());
+    //BIO_push(fbio,sbio);
+
     return buf_io;
 }
+#endif /* WITHOUT_OPENSSL */
 
 static int lua_http_get_url_data(const char* url,core::url_data* d)
 {
@@ -1593,7 +1616,7 @@ static int lua_http_get_url_data(const char* url,core::url_data* d)
     *d->vhost=0;
     d->port=0;
     *d->urn=0;
-    *d->auth=0;                                        
+    *d->auth=0;
     d->ssl=0;
 
     int n=snprintf(tmp,sizeof(tmp),"%s",url);
@@ -1665,7 +1688,11 @@ static int lua_http_get_url_data(const char* url,core::url_data* d)
     return 0;
 }
 
-static size_t lua_http_read_chunk(char* ptr,size_t size,FILE* fp,BIO* bio)
+static size_t lua_http_read_chunk(char* ptr,size_t size,FILE* fp
+#ifndef WITHOUT_OPENSSL
+    ,BIO* bio
+#endif /* WITHOUT_OPENSSL */
+                )
 {
     size_t l=0;
 
@@ -1674,8 +1701,11 @@ static size_t lua_http_read_chunk(char* ptr,size_t size,FILE* fp,BIO* bio)
         size_t n=0;
         if (fp)
             n=fread(ptr+l,1,size-l,fp);
+#ifndef WITHOUT_OPENSSL
         else if (bio)
-            n=BIO_read(bio, ptr+l, size-l); 
+            n=BIO_read(bio, ptr+l, size-l);
+#endif /* WITHOUT_OPENSSL */
+
         if(!n)
             break;
         else
@@ -1691,10 +1721,13 @@ static size_t lua_http_read_chunk(char* ptr,size_t size,FILE* fp,BIO* bio)
 static int lua_http_sendurl(lua_State* L)
 {
     const char* s=lua_tostring(L,1);
+
     int extra_headers=lua_gettop(L)>1?lua_tointeger(L,2):0;
+
     const char* range=lua_gettop(L)>2?lua_tostring(L,3):0;
 
     int rc=0;
+
     char location[1024]="";
 
     if(!s || !core::http_client_fp)
@@ -1704,6 +1737,7 @@ static int lua_http_sendurl(lua_State* L)
     }
 
     core::url_data url;
+
     if(lua_http_get_url_data(s,&url))
     {
         lua_pushinteger(L,rc);
@@ -1713,23 +1747,43 @@ static int lua_http_sendurl(lua_State* L)
     alarm(core::http_timeout);
 
     int sock=core::connect(url.host,url.port);
+
     FILE* fp=NULL;
+
+#ifndef WITHOUT_OPENSSL
     SSL* ssl=NULL;
+
     BIO* bio=NULL;
-    if (url.ssl) {
+
+    if(url.ssl)
+    {
         ssl=SSL_new(core::ssl_ctx);
         bio=core::sock2bio(sock,ssl);
-    } else 
+    }else
+#endif /* WITHOUT_OPENSSL */
         fp=core::sock2file(sock);
-    if(!fp && !bio)
+
+    if(!fp
+#ifndef WITHOUT_OPENSSL
+        && !bio
+#endif /* WITHOUT_OPENSSL */
+                )
     {
-        if (ssl) SSL_free (ssl);
+#ifndef WITHOUT_OPENSSL
+        if(ssl)
+            SSL_free(ssl);
+#endif /* WITHOUT_OPENSSL */
+
         alarm(0);
+
         lua_pushinteger(L,rc);
+
         return 1;
     }
 
-    if (url.ssl) {
+#ifndef WITHOUT_OPENSSL
+    if (url.ssl)
+    {
         BIO_printf (bio,"GET %s HTTP/1.0\r\nHost: %s\r\nUser-Agent: %s\r\nConnection: close\r\nCache-Control: no-cache\r\n",url.urn,url.vhost,core::user_agent);
         if(range && *range)
             BIO_printf(bio,"Range: %s\r\n",range);
@@ -1739,7 +1793,10 @@ static int lua_http_sendurl(lua_State* L)
 
         BIO_printf(bio,"\r\n");
         BIO_flush(bio);
-    } else {
+    }else
+#endif /* WITHOUT_OPENSSL */
+    {
+
         fprintf(fp,"GET %s HTTP/1.0\r\nHost: %s\r\nUser-Agent: %s\r\nConnection: close\r\nCache-Control: no-cache\r\n",url.urn,url.vhost,core::user_agent);
         if(range && *range)
             fprintf(fp,"Range: %s\r\n",range);
@@ -1750,6 +1807,7 @@ static int lua_http_sendurl(lua_State* L)
         fprintf(fp,"\r\n");
         fflush(fp);
     }
+
     int idx=0;
 
     int status=0;
@@ -1758,14 +1816,20 @@ static int lua_http_sendurl(lua_State* L)
 
     while(1)
     {
-        if (url.ssl) {
-            if (0>=BIO_gets(bio,tmp,core::http_sendurl_buf_size))
+#ifndef WITHOUT_OPENSSL
+        if(url.ssl)
+        {
+            if(0>=BIO_gets(bio,tmp,core::http_sendurl_buf_size))
                 break;
-        } else {
-            if (!fgets(tmp,core::http_sendurl_buf_size,fp))
+        }else
+#endif /* WITHOUT_OPENSSL */
+        {
+            if(!fgets(tmp,core::http_sendurl_buf_size,fp))
                 break;
         }
+
         char* p=strpbrk(tmp,"\r\n");
+
         if(p)
             *p=0;
 
@@ -1779,6 +1843,7 @@ static int lua_http_sendurl(lua_State* L)
             {
                 *p=0;
                 p++;
+
                 if(!strcmp(tmp,"HTTP/1.1") || !strcmp(tmp,"HTTP/1.0"))
                 {
                     char* p2=strchr(p,' ');
@@ -1818,12 +1883,20 @@ static int lua_http_sendurl(lua_State* L)
 
     if(status!=200 && status!=206)
     {
-        if (fp) fclose(fp);
-        if (bio) {
-            SSL_set_shutdown(ssl, SSL_SENT_SHUTDOWN|SSL_RECEIVED_SHUTDOWN); 
-            BIO_free_all(bio);			
+        if(fp)
+            fclose(fp);
+
+#ifndef WITHOUT_OPENSSL
+        if(bio)
+        {
+            SSL_set_shutdown(ssl, SSL_SENT_SHUTDOWN|SSL_RECEIVED_SHUTDOWN);
+
+            BIO_free_all(bio);
         }
+#endif /* WITHOUT_OPENSSL */
+
         alarm(0);
+
         lua_pushinteger(L,rc);
 
         if(*location)
@@ -1847,7 +1920,11 @@ static int lua_http_sendurl(lua_State* L)
 
     int dfd=fileno(core::http_client_fp);
 
-    while((n=lua_http_read_chunk(tmp,core::http_sendurl_buf_size,fp,bio))>0)
+    while((n=lua_http_read_chunk(tmp,core::http_sendurl_buf_size,fp
+#ifndef WITHOUT_OPENSSL
+        ,bio
+#endif /* WITHOUT_OPENSSL */
+            ))>0)
     {
         size_t ll=0;
 
@@ -1864,11 +1941,17 @@ static int lua_http_sendurl(lua_State* L)
 
     alarm(0);
 
-    if (fp) fclose(fp);
-    if (bio) {
-        SSL_set_shutdown(ssl, SSL_SENT_SHUTDOWN|SSL_RECEIVED_SHUTDOWN); 
-        BIO_free_all(bio);			
+    if(fp)
+        fclose(fp);
+
+#ifndef WITHOUT_OPENSSL
+    if(bio)
+    {
+        SSL_set_shutdown(ssl,SSL_SENT_SHUTDOWN|SSL_RECEIVED_SHUTDOWN);
+
+        BIO_free_all(bio);
     }
+#endif /* WITHOUT_OPENSSL */
 
     lua_pushinteger(L,rc);
 
@@ -1926,11 +2009,11 @@ static int lua_http_sendmcasturl(lua_State* L)
                 {
                     fprintf(mcast::verb_fp,"multicast source: %s:%i\n",inet_ntoa(sin.sin_addr),ntohs(sin.sin_port));
                     pnum++;
-                }  
+                }
 
                 if(write(dfd,buf,n)!=n)
                     break;
-                else        
+                else
                     alarm(core::http_timeout);
             }
 
@@ -2035,22 +2118,38 @@ static int lua_http_download(lua_State* L)
     if(s)
     {
         core::url_data url;
+
         if(!lua_http_get_url_data(s,&url))
         {
             alarm(core::http_timeout);
 
             int sock=core::connect(url.host,url.port);
+
             FILE* fp=NULL;
+
+#ifndef WITHOUT_OPENSSL
             SSL* ssl=NULL;
+
             BIO* bio=NULL;
-            if (url.ssl) {
-                ssl=SSL_new(core::ssl_ctx);
-                bio=core::sock2bio(sock,ssl);
-            } else 
-                fp=core::sock2file(sock);
-            if(fp || bio)
+
+            if (url.ssl)
             {
-                if (url.ssl) {
+                ssl=SSL_new(core::ssl_ctx);
+
+                bio=core::sock2bio(sock,ssl);
+            }else
+#endif /* WITHOUT_OPENSSL */
+                fp=core::sock2file(sock);
+
+            if(fp
+#ifndef WITHOUT_OPENSSL
+                || bio
+#endif /* WITHOUT_OPENSSL */
+                        )
+            {
+#ifndef WITHOUT_OPENSSL
+                if(url.ssl)
+                {
                     BIO_printf(bio,
                         "%s %s HTTP/1.0\r\nHost: %s\r\nUser-Agent: %s\r\nConnection: close\r\nCache-Control: no-cache\r\n",*post_data?"POST":"GET",
                             url.urn,url.vhost,core::user_agent);
@@ -2068,7 +2167,9 @@ static int lua_http_download(lua_State* L)
                         BIO_write(bio,post_data,post_data_size);
 
                     BIO_flush(bio);
-                } else {
+                }else
+#endif /* WITHOUT_OPENSSL */
+                {
                     fprintf(fp,
                         "%s %s HTTP/1.0\r\nHost: %s\r\nUser-Agent: %s\r\nConnection: close\r\nCache-Control: no-cache\r\n",*post_data?"POST":"GET",
                             url.urn,url.vhost,core::user_agent);
@@ -2085,7 +2186,9 @@ static int lua_http_download(lua_State* L)
 
                     fflush(fp);
                 }
+
                 int status=0;
+
                 int content_length=-1;
 
                 int n;
@@ -2094,22 +2197,30 @@ static int lua_http_download(lua_State* L)
 
                 while(1)
                 {
-                    if (url.ssl) {
-                        if (0>=BIO_gets(bio,tmp,sizeof(tmp)))
+#ifndef WITHOUT_OPENSSL
+                    if(url.ssl)
+                    {
+                        if(0>=BIO_gets(bio,tmp,sizeof(tmp)))
                             break;
-                    } else {
-                        if (!fgets(tmp,sizeof(tmp),fp))
+                    }else
+#endif /* WITHOUT_OPENSSL */
+                    {
+                        if(!fgets(tmp,sizeof(tmp),fp))
                             break;
                     }
+
                     char* p=strpbrk(tmp,"\r\n");
+
                     if(p)
                         *p=0;
+
                     if(!*tmp)
                         break;
 
                     if(!idx)
                     {
                         char* pp=strchr(tmp,' ');
+
                         if(pp)
                         {
                             while(*pp && *pp==' ')
@@ -2117,6 +2228,7 @@ static int lua_http_download(lua_State* L)
                             char* pp2=strchr(pp,' ');
                             if(pp2)
                                 *pp2=0;
+
                             status=atoi(pp);
                         }
                     }else
@@ -2144,11 +2256,16 @@ static int lua_http_download(lua_State* L)
 
                 while(1)
                 {
-                    if (url.ssl)
-                        n=BIO_read(bio, tmp, sizeof(tmp)); 
+#ifndef WITHOUT_OPENSSL
+                    if(url.ssl)
+                        n=BIO_read(bio,tmp,sizeof(tmp));
                     else
+#endif /* WITHOUT_OPENSSL */
                         n=fread(tmp,1,sizeof(tmp),fp);
-                    if (n<=0) break;
+
+                    if(n<=0)
+                        break;
+
                     if(dfp)
                     {
                         if(fwrite(tmp,1,n,dfp)!=n)
@@ -2157,17 +2274,24 @@ static int lua_http_download(lua_State* L)
                         luaL_addlstring(&B,tmp,n);
 
                     len+=n;
+
                     alarm(core::http_timeout);
                 }
 
                 if(status!=200 || (content_length!=-1 && content_length!=len))
                     len=0;
 
-                if (fp) fclose(fp);
-                if (bio) {
-                    SSL_set_shutdown(ssl, SSL_SENT_SHUTDOWN|SSL_RECEIVED_SHUTDOWN); 
-                    BIO_free_all(bio);			
+                if(fp)
+                    fclose(fp);
+
+#ifndef WITHOUT_OPENSSL
+                if(bio)
+                {
+                    SSL_set_shutdown(ssl, SSL_SENT_SHUTDOWN|SSL_RECEIVED_SHUTDOWN);
+
+                    BIO_free_all(bio);
                 }
+#endif /* WITHOUT_OPENSSL */
             }
 
             alarm(0);
@@ -2178,6 +2302,7 @@ static int lua_http_download(lua_State* L)
     if(dfp)
     {
         lua_pushinteger(L,len);
+
         fclose(dfp);
 
         if(!len)
@@ -2186,13 +2311,13 @@ static int lua_http_download(lua_State* L)
     }else
     {
         luaL_pushresult(&B);
+
         if(!len)
         {
             lua_pop(L,1);
             lua_pushnil(L);
         }
     }
-
 
     if(*location)
         lua_pushstring(L,location);
@@ -2207,60 +2332,88 @@ static int lua_http_get_length(lua_State* L)
     const char* s=lua_tostring(L,1);
 
     int len=0;
+
     char location[1024]="";
 
     if(s)
     {
         core::url_data url;
+
         if(!lua_http_get_url_data(s,&url))
         {
             alarm(core::http_timeout);
 
             int sock=core::connect(url.host,url.port);
+
             FILE* fp=NULL;
+
+#ifndef WITHOUT_OPENSSL
             SSL* ssl=NULL;
+
             BIO* bio=NULL;
-            if (url.ssl) {
-                ssl=SSL_new(core::ssl_ctx);
-                bio=core::sock2bio(sock,ssl);
-            } else 
-                fp=core::sock2file(sock);
-            if(fp || bio)
+
+            if(url.ssl)
             {
-                if (url.ssl) {
+                ssl=SSL_new(core::ssl_ctx);
+
+                bio=core::sock2bio(sock,ssl);
+            }else
+#endif /* WITHOUT_OPENSSL */
+                fp=core::sock2file(sock);
+
+            if(fp
+#ifndef WITHOUT_OPENSSL
+                || bio
+#endif /* WITHOUT_OPENSSL */
+                        )
+            {
+#ifndef WITHOUT_OPENSSL
+                if(url.ssl)
+                {
                     BIO_printf(bio,
                         "HEAD %s HTTP/1.0\r\nHost: %s\r\nUser-Agent: %s\r\nConnection: close\r\nCache-Control: no-cache\r\n\r\n",
                             url.urn,url.vhost,core::user_agent);
 
                     BIO_flush(bio);
-                } else {
+                }else
+#endif /* WITHOUT_OPENSSL */
+                {
                     fprintf(fp,
                         "HEAD %s HTTP/1.0\r\nHost: %s\r\nUser-Agent: %s\r\nConnection: close\r\nCache-Control: no-cache\r\n\r\n",
                             url.urn,url.vhost,core::user_agent);
 
                     fflush(fp);
                 }
-                
+
                 int status=0;
+
                 int content_length=-1;
 
                 int n;
+
                 char tmp[1024];
+
                 int idx=0;
 
                 while(1)
                 {
-                    if (url.ssl) {
-                        if (0>=BIO_gets(bio,tmp,sizeof(tmp)))
+#ifndef WITHOUT_OPENSSL
+                    if(url.ssl)
+                    {
+                        if(0>=BIO_gets(bio,tmp,sizeof(tmp)))
                             break;
-                    } else {
-                        if (!fgets(tmp,sizeof(tmp),fp))
+                    }else
+#endif /* WITHOUT_OPENSSL */
+                    {
+                        if(!fgets(tmp,sizeof(tmp),fp))
                             break;
                     }
 
                     char* p=strpbrk(tmp,"\r\n");
+
                     if(p)
                         *p=0;
+
                     if(!*tmp)
                         break;
 
@@ -2274,15 +2427,18 @@ static int lua_http_get_length(lua_State* L)
                             char* pp2=strchr(pp,' ');
                             if(pp2)
                                 *pp2=0;
+
                             status=atoi(pp);
                         }
                     }else
                     {
                         char* pp=strchr(tmp,':');
+
                         if(pp)
                         {
                             *pp=0;
                             pp++;
+
                             while(*pp && *pp==' ')
                                 pp++;
 
@@ -2302,11 +2458,16 @@ static int lua_http_get_length(lua_State* L)
                 if(content_length>0)
                     len=content_length;
 
-                if (fp) fclose(fp);
-                if (bio) {
-                    SSL_set_shutdown(ssl, SSL_SENT_SHUTDOWN|SSL_RECEIVED_SHUTDOWN); 
-                    BIO_free_all(bio);			
+                if(fp)
+                    fclose(fp);
+
+#ifndef WITHOUT_OPENSSL
+                if(bio)
+                {
+                    SSL_set_shutdown(ssl, SSL_SENT_SHUTDOWN|SSL_RECEIVED_SHUTDOWN);
+                    BIO_free_all(bio);
                 }
+#endif /* WITHOUT_OPENSSL */
             }
 
             alarm(0);
@@ -2339,6 +2500,7 @@ static int lua_http_timeout(lua_State* L)
 static int lua_http_sendurl_buffer_size(lua_State* L)
 {
     int size=lua_tointeger(L,1);
+
     int all=lua_tointeger(L,2);
 
     if(size>0)
@@ -2379,7 +2541,7 @@ static int lua_core_readpidfile(const char* path)
     if(rc>0 && pid>0)
         return pid;
 
-    return -1;    
+    return -1;
 }
 
 static int lua_core_restart(lua_State* L)
@@ -2471,16 +2633,18 @@ int luaopen_luaxcore(lua_State* L)
 {
     mcast::uuid_init();
 
+#ifndef WITHOUT_OPENSSL
 #if OPENSSL_VERSION_NUMBER < 0x10100000L
-	SSL_library_init();
-	SSL_load_error_strings();
-	OpenSSL_add_ssl_algorithms();
-	core::ssl_ctx=SSL_CTX_new(SSLv23_client_method());
+    SSL_library_init();
+    SSL_load_error_strings();
+    OpenSSL_add_ssl_algorithms();
+    core::ssl_ctx=SSL_CTX_new(SSLv23_client_method());
 #else
-	core::ssl_ctx=SSL_CTX_new(TLS_client_method());
-#endif
-	SSL_CTX_set_verify(core::ssl_ctx, SSL_VERIFY_NONE, NULL);
-		
+    core::ssl_ctx=SSL_CTX_new(TLS_client_method());
+#endif /* OPENSSL_VERSION_NUMBER */
+    SSL_CTX_set_verify(core::ssl_ctx, SSL_VERIFY_NONE, NULL);
+#endif /* WITHOUT_OPENSSL */
+
     static const luaL_Reg lib_core[]=
     {
         {"detach",lua_core_detach},

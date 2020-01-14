@@ -83,17 +83,17 @@ cfg.playlists_update_interval=0
 playlist=
 {
 --    { './playlists/mozhay.m3u', 'Mozhay.tv' },
---    { './localmedia', 'Local Media Files' }
+    { './localmedia', 'Local Media Files' }
 --    { './private', 'Private Media Files', '127.0.0.1;192.168.1.1' }  -- only for 127.0.0.1 and 192.168.1.1
 }
 
 -- feeds list (plugin, feed name, feed type)
 feeds=
 {
-    { 'vimeo',          'channel/hd',           'Vimeo HD Channel' },
-    { 'vimeo',          'channel/hdxs',         'Vimeo Xtreme sports' },
-    { 'vimeo',          'channel/mtb',          'Vimeo MTB Channel' },
-    { 'youtube',        'channel/top_rated',    'YouTube Top Rated' },
+--    { 'vimeo',          'channel/hd',           'Vimeo HD Channel' },
+--    { 'vimeo',          'channel/hdxs',         'Vimeo Xtreme sports' },
+--    { 'vimeo',          'channel/mtb',          'Vimeo MTB Channel' },
+--    { 'youtube',        'channel/top_rated',    'YouTube Top Rated' },
 --    { 'youtube',        'Drift0r',              'Drift0r' },
 --    { 'youtube',        'XboxAhoy',             'XboxAhoy' },
 --    { 'ag',             'videos',               'AG - New' },

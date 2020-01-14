@@ -1,0 +1,13 @@
+# MT76x8
+STAGING_DIR     = /opt/openwrt/mt76x8
+BIN             = $(STAGING_DIR)/toolchain-mipsel_24kc_gcc-5.5.0_musl/bin
+LIBEXEC         = $(STAGING_DIR)/toolchain-mipsel_24kc_gcc-5.5.0_musl/libexec/gcc/mipsel-openwrt-linux-musl/5.5.0
+CC              = $(BIN)/mipsel-openwrt-linux-gcc
+CPP             = $(BIN)/mipsel-openwrt-linux-gcc
+STRIP           = $(BIN)/mipsel-openwrt-linux-strip
+RM              = rm
+PLATFORM        = mt76x8
+TARGET_DIR      = .
+MY_CFLAGS       =
+
+include rules.mk
