@@ -91,7 +91,7 @@ int luaopen_luajson(lua_State* L)
 
 int libjson::lua_json_no_unicode_escape(lua_State* L)
 {
-    no_unicode_escape=luaL_checkint(L,1);
+    no_unicode_escape=luaL_checkinteger(L,1);
 
     return 0;
 }

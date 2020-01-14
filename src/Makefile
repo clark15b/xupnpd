@@ -1,5 +1,5 @@
-LUA     = lua-5.1.4
-#LUA     = lua-5.2.0
+#LUA     = lua-5.1.4
+LUA     = lua-5.3.5
 STATIC  = false
 OPENSSL = /home/user/src/openssl-0.9.8e
 
