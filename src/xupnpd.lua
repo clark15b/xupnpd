@@ -1,5 +1,9 @@
 cfg={}
 
+cfg.ui_auth_file='auth.txt'
+
+cfg.ui_session_file='/tmp/xupnpd.session'
+
 -- multicast interface for SSDP exchange, 'eth0', 'br0', 'br-lan' for example
 cfg.ssdp_interface='lo'
 

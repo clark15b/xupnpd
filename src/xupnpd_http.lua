@@ -101,12 +101,12 @@ end
 
 function http_send_headers(err,ext,len)
 
-	http_cahce= {}
-	http_cahce['jpg']='max-age=3600'
-	http_cahce['png']='max-age=3600'
-	http_cahce['ico']='max-age=3600'
-	http_cahce['css']='max-age=3600'
-	http_cahce['js']='max-age=3600'
+	http_cache= {}
+	http_cache['jpg']='max-age=3600'
+	http_cache['png']='max-age=3600'
+	http_cache['ico']='max-age=3600'
+	http_cache['css']='max-age=3600'
+	http_cache['js']='max-age=3600'
 	http_mime['svg']='max-age=3600'
 	http_mime['eot']='max-age=3600'
 	http_mime['woff']='max-age=3600'
@@ -129,7 +129,7 @@ function http_send_headers(err,ext,len)
 			string.format(
 				'Cache-control: %s\r\n'..
 				'Content-Type: %s\r\nEXT:\r\n',
-					http_cahce[ext] or 'no-cache',
+					http_cache[ext] or 'no-cache',
 					http_mime[ext] or 'application/x-octet-stream'
 			 )
 		)
@@ -278,10 +278,16 @@ function http_handler(what,from,port,msg)
     if not msg or not msg.reqline then return end
 
     local pr_name=nil
+    
+    for plugin_name,plugin in pairs(plugins) do
+        if plugin.http_handler and not plugin.disabled then
+            plugin.http_handler(what,from,port,msg)
+        end
+    end
 
-    if cfg.profiles then
-        pr_name=profile_change(msg['user-agent'],msg)
-
+    if plugins.profiles and not plugins.profiles.disabled then
+    	pr_name=plugins.profiles.current
+    	
         if msg.reqline[2]=='/dev.xml' then msg.reqline[2]=cfg.dev_desc_xml end
     end
 
@@ -313,7 +319,7 @@ function http_handler(what,from,port,msg)
             http_send_headers(404)
         else
             dofile(http_ui_main)
-            ui_handler(f.args,msg.data or '',from_ip,f.url,msg.reqline[1])
+            ui_handler(f.args,msg.data or '',from_ip,f.url,msg.reqline[1],msg['cookie'])
         end
         return
     elseif string.find(f.url,'^/app/?') then
@@ -521,12 +527,12 @@ function http_handler(what,from,port,msg)
     elseif url=='sub' then
 
         local srt = string.format("%s.srt", object)
-	local pls=nil
-	object = string.format("%s_", object)
-	while object:len() > 0 and (not pls or not pls.path) do
-           object = object:gsub("_[^_]*$", "")
-           pls=find_playlist_object(object)
-	end
+        local pls=nil
+        object = string.format("%s_", object)
+        while object:len() > 0 and (not pls or not pls.path) do
+            object = object:gsub("_[^_]*$", "")
+            pls=find_playlist_object(object)
+        end
 
         if not pls or not pls.path then http_send_headers(404) return end
 
@@ -588,6 +594,15 @@ function http_handler(what,from,port,msg)
             http.send(string.format('Accept-Ranges: bytes\r\nContent-Length: %s\r\n',flen))
         else
             http.send('Accept-Ranges: none\r\n')
+        end
+
+        if "1" == msg['getcaptioninfo.sec'] and pls.path then
+            for i, n in ipairs(util.dir(pls.path:sub(1, pls.path:len() - pls.url:len()))) do
+                if n:sub(n:len() - 4+1) == ".srt" then
+                    http.send(string.format('CaptionInfo.sec: %s/sub/%s.srt\r\n', www_location,pls.objid))
+                    break
+                end
+            end
         end
 
         if cfg.dlna_headers==true then http.send('TransferMode.DLNA.ORG: Streaming\r\nContentFeatures.DLNA.ORG: '..extras..'\r\n') end

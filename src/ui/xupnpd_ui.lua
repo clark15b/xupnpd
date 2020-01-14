@@ -3,8 +3,6 @@
 -- https://tsdemuxer.googlecode.com/svn/trunk/xupnpd
 
 
-
-
 ui_args=nil
 ui_data=nil
 dofile(cfg.ui_path.."helper.lua")
@@ -14,7 +12,7 @@ end
 
 function ui_error()
     http.send('<h2>Error occurred</h3>')
-    http.send('<br/><a class="btn btn-info" href="/ui">Back</a>')
+    http.send('<br/><a class="btn btn-info" href="/ui/">Back</a>')
 end
 
 function ui_downloads()
@@ -542,6 +540,65 @@ function ui_restart()
     http.send('<script>setTimeout("document.forms[0].submit()",3000)</script>')
 end
 
+function ui_logout()
+    os.remove(cfg.ui_session_file)
+    http.send('<meta http-equiv="refresh" content="0;URL=/"ui//"" />')
+end
+
+function ui_login()
+    password_enc = util.md5_string_hash(ui_data)
+    if password_enc == auth then
+        compare_session_id = 'session_id=' .. generate_session_id(35)
+        write_file(cfg.ui_session_file, compare_session_id)
+        http_data=string.format('<script>document.cookie="%s"</script>', compare_session_id)
+	http.send(http_data)
+        http.send('<meta http-equiv="refresh" content="0;URL=/"ui//"" />')
+    else
+        http.send('<h2>Wrong password</h2>')
+    end
+end
+
+function ui_set_password()
+    if ui_data and ui_data ~= '' then
+        password_enc = util.md5_string_hash(ui_data)
+        write_file(cfg.ui_auth_file, password_enc)
+        os.remove(cfg.ui_session_file)
+        http.send('<meta http-equiv="refresh" content="3;URL=/"ui//"" />')
+        http.send('<h4>Password changed, you will be redirected in 3 secons, please login again.</h4>')
+    else
+        http.send('<h3>Set / change access password.</h3>')
+        http.send('<form class="form-inline my-2 my-lg-0" method="post" action="/ui/set_password">')
+        http.send('<input class="form-control mr-sm-2" name="password" type="password" placeholder="New Password"> ')
+        http.send('<button class="btn btn-success my-2 my-sm-0" type="submit">Change</button>')
+        http.send('</form>')
+    end
+end
+
+function generate_session_id(length)
+        local res = ""
+        for i = 1, length do
+                res = res .. string.char(math.random(97, 122))
+        end
+        return res
+end
+
+function read_file (file)
+    local content
+    local f = io.open(file, "r")
+    if f then
+        local fa = assert(f)
+        content = string.gsub(fa:read("*all"),'\n','')
+        f:close()
+    end
+    return content
+end
+
+function write_file (file, data)
+  local write_handle = io.open(file, "w")
+  write_handle:write(data)
+  write_handle:close()
+end
+
 ui_actions=
 {
     ['main']            = { 'xupnpd', ui_main },
@@ -568,10 +625,13 @@ ui_actions=
     ['fhelp']           = { 'xupnpd - feeds help', ui_fhelp },
     ['mhelp']           = { 'xupnpd - mimes help', ui_mhelp },
     ['ehelp']           = { 'xupnpd - extras help', ui_ehelp },
-    ['restart']         = { 'xupnpd - restart', ui_restart }
+    ['restart']         = { 'xupnpd - restart', ui_restart },
+    ['login']           = { 'xupnpd - login', ui_login },
+    ['logout']          = { 'xupnpd - logout', ui_logout },
+    ['set_password']    = { 'xupnpd - set password', ui_set_password}
 }
 
-function ui_handler(args,data,ip,url,methtod)
+function ui_handler(args,data,ip,url,methtod,cookie)
     for plugin_name,plugin in pairs(plugins) do
         if plugin.ui_actons then
             for act_name,act in pairs(plugin.ui_actons) do
@@ -582,33 +642,33 @@ function ui_handler(args,data,ip,url,methtod)
 
     local action=string.match(url,'^/ui/(.+)$')
 
-	if action then
-		local  path_file , file_format =string.match(action, "(.+%.(%a+))[%?]?.*$")
+    if action then
+        local  path_file , file_format =string.match(action, "(.+%.(%a+))[%?]?.*$")
 
-		if  file_format == 'm3u' then
-			ui_download(action)
-			return
-		elseif file_format then
-			http_send_headers(200,file_format)
-			http.sendfile(cfg.ui_path..path_file)
-			return
-		end
-
-		if action == "api" then
-			ui_api_call(args)
-			return
-		end
-
-		if string.find(action,"api_v2") then
-			dofile(cfg.ui_path.."api_v2.lua")
-
-			ui_api_v_2_call(args,data,ip, string.gsub(url, "/ui/api_v2/", ''),methtod)
-			return
-		end
-
-	else
-		action='main'
+	if  file_format == 'm3u' then
+		ui_download(action)
+		return
+	elseif file_format then
+		http_send_headers(200,file_format)
+		http.sendfile(cfg.ui_path..path_file)
+		return
 	end
+
+	if action == "api" then
+	 	ui_api_call(args)
+		return
+	end
+
+	if string.find(action,"api_v2") then
+		dofile(cfg.ui_path.."api_v2.lua")
+
+		ui_api_v_2_call(args,data,ip, string.gsub(url, "/ui/api_v2/", ''),methtod)
+		return
+	end
+
+    else
+	action='main'
+    end
 
     http_send_headers(200,'html')
 
@@ -616,8 +676,31 @@ function ui_handler(args,data,ip,url,methtod)
 
     if not act then act=ui_actions['error'] end
 
+    auth=read_file(cfg.ui_auth_file)
+
+    if auth then
+        local compare_session_id=read_file(cfg.ui_session_file)
+        if cookie == compare_session_id and compare_session_id ~= nil then
+            is_logged_in = true
+        else
+            is_logged_in = false
+        end
+    else
+        -- if auth isn't there everybody is logged in
+        is_logged_in = true
+    end
+
+    if is_logged_in == false and action ~= 'login' then act=ui_actions['main'] end
+
     http_vars.title=act[1]
     http_vars.content=act[2]
+    if is_logged_in == true then
+        http_vars.login = 'none'
+        http_vars.logout = 'block'
+    else
+        http_vars.login = 'block'
+        http_vars.logout = 'none'
+    end
 
     ui_args=args
     ui_data=data

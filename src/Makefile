@@ -92,6 +92,9 @@ embedded:
 	$(SDK)/gcc $(CFLAGS) -B$(UTILS) -DWITH_URANDOM -o xupnpd-$(TARGET) $(SRC) md5.o -llua -lm -ldl -lssl -lcrypto
 	$(SDK)/strip xupnpd-$(TARGET)
 
+test: x86
+	cd ../test; roundup plugins/*-test.sh	# https://github.com/samunders-core/roundup/tree/test_name_in_before_and_after
+
 clean:
 	$(MAKE) -C $(LUA) clean
 	rm -f $(LUA)/liblua.a

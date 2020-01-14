@@ -2471,10 +2471,14 @@ int luaopen_luaxcore(lua_State* L)
 {
     mcast::uuid_init();
 
-	SSL_library_init(); 
+#if OPENSSL_VERSION_NUMBER < 0x10100000L
+	SSL_library_init();
 	SSL_load_error_strings();
 	OpenSSL_add_ssl_algorithms();
 	core::ssl_ctx=SSL_CTX_new(SSLv23_client_method());
+#else
+	core::ssl_ctx=SSL_CTX_new(TLS_client_method());
+#endif
 	SSL_CTX_set_verify(core::ssl_ctx, SSL_VERIFY_NONE, NULL);
 		
     static const luaL_Reg lib_core[]=
