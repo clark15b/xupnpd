@@ -147,9 +147,9 @@ function http_send_headers(err,ext,len)
 
     if cfg.debug>0 then
 		if err >= 300 and err < 400  then
-			print('http rederict '..err..' Location ' .. ext)
+			print('http redirect '..err..' Location ' .. ext)
 		elseif err> 400 then
-			print('http rederict '..err)
+			print('http error '..err)
 		end
 	end
 
