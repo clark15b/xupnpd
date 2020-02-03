@@ -107,9 +107,9 @@ function http_send_headers(err,ext,len)
 	http_cache['ico']='max-age=3600'
 	http_cache['css']='max-age=3600'
 	http_cache['js']='max-age=3600'
-	http_mime['svg']='max-age=3600'
-	http_mime['eot']='max-age=3600'
-	http_mime['woff']='max-age=3600'
+	http_cache['svg']='max-age=3600'
+	http_cache['eot']='max-age=3600'
+	http_cache['woff']='max-age=3600'
 
     http.send(
         string.format(
