@@ -33,7 +33,7 @@ function load_plugins(path,what)
     local d=util.dir(path)
 
     if d then
-    	table.sort(d)	-- ensure stable loading order
+        table.sort(d)   -- ensure stable loading order
         for i,n in ipairs(d) do
             if string.find(n,'^[%w_-]+%.lua$') then
                 if cfg.debug>0 then print(what..' \''..n..'\'') end
@@ -43,6 +43,15 @@ function load_plugins(path,what)
     end
 end
 
+function fix_path(s)
+    if string.find(s,'/$') then
+        return s
+    else
+        return s..'/'
+    end
+end
+
+cfg.playlists_path=fix_path(cfg.playlists_path)         -- add trailing slash
 
 -- options for profiles
 cfg.dev_desc_xml='/dev.xml'             -- UPnP Device Description XML
