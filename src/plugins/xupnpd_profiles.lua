@@ -33,7 +33,7 @@ local this = {
 		load_plugins(cfg.profiles or "./profiles/",'profile')
 	end,
 	http_handler = function(what,from,port,msg)
-		profile_change(msg['user-agent'], msg)
+		plugins.profiles.current = profile_change(msg['user-agent'], msg)
 	end,
 	sendurl = function(url,range) end,
 	ui_config_vars = {
