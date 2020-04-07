@@ -20,21 +20,21 @@ function ui_downloads()
     http.send('<br/><table class="table">')
     if playlist_data.elements[1] then
         for i,j in ipairs(playlist_data.elements[1].elements) do
-            http.send(string.format('<tr><td><a href="/ui/%s.m3u">%s</a></td></tr>',j.name,j.name))
+            http.send(string.format('<tr><td><a href="/ui/%s.m3u">%s</a></td></tr>',j.objid,j.name))
         end
     end
     http.send('</table>')
     http.send('<br/><a class="btn btn-info" href="/ui">Back</a>')
 end
 
+function ui_playlist_get_url(pls)
+        return string.format('%s/proxy/%s.%s',cfg.extern_url or www_location,pls.objid,pls.type)
+end
+
 function ui_download(name)
     name=util.urldecode(string.match(name,'(.+)%.m3u$'))
 
-    local pls=nil
-
-    for i,j in ipairs(playlist_data.elements[1].elements) do
-        if j.name==name then pls=j break end
-    end
+    local pls=find_playlist_object(name)
 
     if not pls then
         http.send(
@@ -48,12 +48,12 @@ function ui_download(name)
     http.send(
         string.format(
             'HTTP/1.1 200 Ok\r\nPragma: no-cache\r\nCache-control: no-cache\r\nDate: %s\r\nServer: %s\r\nAccept-Ranges: none\r\n'..
-            'Connection: close\r\nContent-Type: audio/x-mpegurl\r\n\r\n',os.date('!%a, %d %b %Y %H:%M:%S GMT'),ssdp_server)
+            'Connection: close\r\nContent-Type: audio/x-mpegurl\r\nContent-Disposition: attachment; filename=\"%s.m3u\"\r\n\r\n',os.date('!%a, %d %b %Y %H:%M:%S GMT'),ssdp_server,pls.name)
     )
 
     http.send('#EXTM3U\n')
     for i,j in ipairs(pls.elements) do
-        http.send('#EXTINF:0,'..j.name..'\n'..playlist_get_url(j)..'\n')
+        http.send('#EXTINF:0,'..j.name..'\n'..ui_playlist_get_url(j)..'\n')
     end
 end
 
@@ -643,7 +643,7 @@ function ui_handler(args,data,ip,url,methtod,cookie)
     local action=string.match(url,'^/ui/(.+)$')
 
     if action then
-        local  path_file , file_format =string.match(action, "(.+%.(%a+))[%?]?.*$")
+        local  path_file , file_format =string.match(action, "(.+%.(%w+))[%?]?.*$")
 
 	if  file_format == 'm3u' then
 		ui_download(action)

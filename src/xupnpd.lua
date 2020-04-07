@@ -79,6 +79,9 @@ cfg.default_mime_type='mpeg'
 cfg.feeds_update_interval=0
 cfg.playlists_update_interval=0
 
+-- host for UI playlist download
+--cfg.extern_url='http://youhost.com'
+
 -- playlist (m3u file path or path with alias
 playlist=
 {
