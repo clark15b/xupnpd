@@ -12,7 +12,8 @@ upnp_type=
 upnp_class=
 {
     ['video']     = 'object.item.videoItem',
-    ['audio']     = 'object.item.audioItem.musicTrack'
+    ['audio']     = 'object.item.audioItem.musicTrack',
+    ['image']     = 'object.item.imageItem'
 }
 
 
@@ -36,7 +37,12 @@ upnp_proto=
     ['ac3']   = 'http-get:*:audio/x-ac3:',
     ['mp3']   = 'http-get:*:audio/mpeg:',
     ['ogg']   = 'http-get:*:audio/x-ogg:',
-    ['wma']   = 'http-get:*:audio/x-ms-wma:'
+    ['wma']   = 'http-get:*:audio/x-ms-wma:',
+    ['jpeg']  = 'http-get:*:image/jpeg:',
+    ['png']   = 'http-get:*:image/png:',
+    ['gif']   = 'http-get:*:image/gif:',
+    ['tiff']  = 'http-get:*:image/tiff:',
+    ['bmp']   = 'http-get:*:image/bmp:'
 }
 
 -- DLNA.ORG_PN, DLNA.ORG_OP, DLNA.ORG_CI, DLNA.ORG_FLAGS
@@ -104,5 +110,12 @@ mime=
     ['ac3']    = { upnp_type.audio, upnp_class.audio, 'audio/x-ac3',     upnp_proto.ac3,   dlna_org_extras.ac3 },
     ['mp3']    = { upnp_type.audio, upnp_class.audio, 'audio/mpeg',      upnp_proto.mp3,   dlna_org_extras.mp3 },
     ['ogg']    = { upnp_type.audio, upnp_class.audio, 'application/ogg', upnp_proto.ogg,   dlna_org_extras.none },
-    ['wma']    = { upnp_type.audio, upnp_class.audio, 'audio/x-ms-wma',  upnp_proto.wma,   dlna_org_extras.wma_full }
+    ['wma']    = { upnp_type.audio, upnp_class.audio, 'audio/x-ms-wma',  upnp_proto.wma,   dlna_org_extras.wma_full },
+    ['jpeg']   = { upnp_type.image, upnp_class.image, 'image/jpeg',      upnp_proto.jpeg,  dlna_org_extras.none },
+    ['jpg']   =  { upnp_type.image, upnp_class.image, 'image/jpeg',      upnp_proto.jpeg,  dlna_org_extras.none },
+    ['png']   =  { upnp_type.image, upnp_class.image, 'image/png',       upnp_proto.png,   dlna_org_extras.none },
+    ['gif']   =  { upnp_type.image, upnp_class.image, 'image/gif',       upnp_proto.gif,   dlna_org_extras.none },
+    ['tiff']  =  { upnp_type.image, upnp_class.image, 'image/tiff',      upnp_proto.tiff,  dlna_org_extras.none },
+    ['tif']   =  { upnp_type.image, upnp_class.image, 'image/tiff',      upnp_proto.tiff,  dlna_org_extras.none },
+    ['bmp']   =  { upnp_type.image, upnp_class.image, 'image/bmp',       upnp_proto.bmp,   dlna_org_extras.none }
 }
