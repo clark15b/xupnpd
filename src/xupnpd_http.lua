@@ -3,6 +3,7 @@
 -- https://tsdemuxer.googlecode.com/svn/trunk/xupnpd
 
 http_mime={}
+http_cache={}
 http_err={}
 http_vars={}
 
@@ -27,6 +28,16 @@ http_mime['m3u']='audio/x-mpegurl'
 http_mime['svg']='image/svg+xml'
 http_mime['eot']='application/vnd.ms-fontobject'
 http_mime['woff']='application/font-woff'
+
+-- max age
+http_cache['jpg']='max-age=3600'
+http_cache['png']='max-age=3600'
+http_cache['ico']='max-age=3600'
+http_cache['css']='max-age=3600'
+http_cache['js']='max-age=3600'
+http_cache['svg']='max-age=3600'
+http_cache['eot']='max-age=3600'
+http_cache['woff']='max-age=3600'
 
 -- http http_error list
 http_err[100]='Continue'
@@ -101,17 +112,6 @@ function compile_templates()
 end
 
 function http_send_headers(err,ext,len)
-
-	http_cache= {}
-	http_cache['jpg']='max-age=3600'
-	http_cache['png']='max-age=3600'
-	http_cache['ico']='max-age=3600'
-	http_cache['css']='max-age=3600'
-	http_cache['js']='max-age=3600'
-	http_cache['svg']='max-age=3600'
-	http_cache['eot']='max-age=3600'
-	http_cache['woff']='max-age=3600'
-
     http.send(
         string.format(
             'HTTP/1.1 %i %s\r\n'..
@@ -119,40 +119,41 @@ function http_send_headers(err,ext,len)
             'Server: %s\r\n'..
             'Accept-Ranges: none\r\n'..
             'Connection: close\r\n',
-			    err,
-				http_err[err] or 'Unknown',
-                os.date('!%a, %d %b %Y %H:%M:%S GMT'),
-			    ssdp_server
-		)
+            err,
+            http_err[err] or 'Unknown',
+            os.date('!%a, %d %b %Y %H:%M:%S GMT'),
+            ssdp_server
+        )
     )
-	if err == 200 then
-		http.send(
-			string.format(
-				'Cache-control: %s\r\n'..
-				'Content-Type: %s\r\nEXT:\r\n',
-					http_cache[ext] or 'no-cache',
-					http_mime[ext] or 'application/x-octet-stream'
-			 )
-		)
-	end
 
-	if err >= 300  and err < 400 then
-		http.send( string.format("Location: %s\r\n", ext))
-	end
+    if err == 200 then
+        http.send(
+            string.format(
+                'Cache-control: %s\r\n'..
+                'Content-Type: %s\r\nEXT:\r\n',
+                http_cache[ext] or 'no-cache',
+                http_mime[ext] or 'application/x-octet-stream'
+            )
+        )
+    end
+
+    if err >= 300  and err < 400 then
+        http.send( string.format("Location: %s\r\n", ext))
+    end
 
     if len then
-		http.send(string.format("Content-Length: %s\r\n",len))
-	end
+        http.send(string.format("Content-Length: %s\r\n",len))
+    end
 
     http.send("\r\n")
 
     if cfg.debug>0 then
-		if err >= 300 and err < 400  then
-			print('http redirect '..err..' Location ' .. ext)
-		elseif err >= 400 then
-			print('http error '..err)
-		end
-	end
+        if err >= 300 and err < 400  then
+            print('http redirect '..err..' Location ' .. ext)
+        elseif err >= 400 then
+            print('http error '..err)
+        end
+    end
 
 end
 
@@ -279,7 +280,7 @@ function http_handler(what,from,port,msg)
     if not msg or not msg.reqline then return end
 
     local pr_name=nil
-    
+
     for plugin_name,plugin in pairs(plugins) do
         if plugin.http_handler and not plugin.disabled then
             plugin.http_handler(what,from,port,msg)
@@ -287,19 +288,19 @@ function http_handler(what,from,port,msg)
     end
 
     if plugins.profiles and not plugins.profiles.disabled then
-    	pr_name=plugins.profiles.current
-    	
+        pr_name=plugins.profiles.current
+
         if msg.reqline[2]=='/dev.xml' then msg.reqline[2]=cfg.dev_desc_xml end
     end
 
     if msg.reqline[2]=='/' then
         if http_ui_main then
-			http_send_headers(301,"ui/") --Делаем редерикт для админки, что бы не таскать везде магичскую строчку "ui" и не писать абсолютные пути в HTML админки
-			msg.reqline[2]='/ui'
- 			return
-		else
-			msg.reqline[2]='/index.html'
-		end
+            http_send_headers(301,"ui/") --Делаем редерикт для админки, что бы не таскать везде магичскую строчку "ui" и не писать абсолютные пути в HTML админки
+            msg.reqline[2]='/ui'
+            return
+        else
+            msg.reqline[2]='/index.html'
+        end
     end
 
     local head=false

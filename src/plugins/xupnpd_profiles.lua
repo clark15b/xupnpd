@@ -7,6 +7,7 @@ function profile_change(user_agent,req)
         if profile.disabled~=true and  match and match(user_agent,req) then
 
             local options=profile.options
+
             local mtypes=profile.mime_types
 
             if options then for i,j in pairs(options) do cfg[i]=j end end
@@ -18,31 +19,41 @@ function profile_change(user_agent,req)
                     for i,j in pairs(mtypes) do mime[i]=j end
                 end
             end
-            plugins.profiles.current = name			
-            return
+
+            return name
         end
     end
-    plugins.profiles.current = nil
+
+    return nil
 end
 
-local this = {
-	disabled = false,
-	name = 'profiles',
-	desc = 'enables per-user-agent response customizations',
-	apply_config = function()
-		load_plugins(cfg.profiles or "./profiles/",'profile')
-	end,
-	http_handler = function(what,from,port,msg)
-		plugins.profiles.current = profile_change(msg['user-agent'], msg)
-	end,
-	sendurl = function(url,range) end,
-	ui_config_vars = {
-		{ "input",  "profiles" }
-	},
-	ui_actions = {
-		profiles_ui = { 'xupnpd - profiles ui action', function() end }        -- 'http://127.0.0.1:4044/ui/profiles_ui' for call
-	},
-	ui_vars = {}	-- use whatever ${key} in UI HTML templates
+function profile_apply_config()
+    load_plugins(cfg.profiles or "./profiles/",'profile')
+end
+
+function profile_http_handler(what,from,port,msg)
+    plugins.profiles.current=profile_change(msg['user-agent'],msg)
+end
+
+function profile_sendurl(url,range) end
+
+plugins['profiles']={}
+plugins.profiles.disabled=false
+plugins.profiles.name='Profiles'
+plugins.profiles.desc='enables per-user-agent response customizations'
+plugins.profiles.apply_config=profile_apply_config
+plugins.profiles.http_handler=profile_http_handler
+plugins.profiles.sendurl=profile_sendurl
+plugins.profiles.current=nil
+
+plugins.profiles.ui_config_vars=
+{
+    { "input",  "profiles" }
 }
 
-plugins[this.name] = this
+plugins.profiles.ui_actions=
+{
+    profiles_ui={ 'xupnpd - profiles ui action', function() end }       -- 'http://127.0.0.1:4044/ui/profiles_ui' for call
+}
+
+plugins.profiles.ui_vars={}                                             -- use whatever ${key} in UI HTML templates

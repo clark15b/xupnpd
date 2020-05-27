@@ -288,35 +288,6 @@ function get_drive_state(drive)
     return string.match(s,'drive state is:%s+(.+)%s+')
 end
 
-
-function profile_change(user_agent,req)
-    if not user_agent or user_agent=='' then return end
-
-    for name,profile in pairs(profiles) do
-        local match=profile.match
-
-        if profile.disabled~=true and  match and match(user_agent,req) then
-
-            local options=profile.options
-            local mtypes=profile.mime_types
-
-            if options then for i,j in pairs(options) do cfg[i]=j end end
-
-            if mtypes then
-                if profile.replace_mime_types==true then
-                    mime=mtypes
-                else
-                    for i,j in pairs(mtypes) do mime[i]=j end
-                end
-            end
-
-            return name
-        end
-    end
-    return nil
-end
-
-
 -- event handlers
 events['SIGUSR1']=reload_playlist
 events['reload']=reload_playlist
