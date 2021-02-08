@@ -2,6 +2,8 @@
 -- clark15b@gmail.com
 -- https://tsdemuxer.googlecode.com/svn/trunk/xupnpd
 
+table.maxn = table.maxn or function(t) return #t end  -- support Lua 5.3+
+
 http.sendurl_buffer_size(32768,1);
 
 if cfg.daemon==true then core.detach() end
