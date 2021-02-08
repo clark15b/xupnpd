@@ -12,7 +12,7 @@ before() {
 }
 
 xupnpd() {	# unbuffered IO eases failing test debugging
-  stdbuf -i 0 -o 0 -e 0 "$SRC_DIR/xupnpd" "$@"
+  stdbuf -i 0 -o 0 -e 0 "$SRC_DIR/xupnpd"${PLATFORM:+-$PLATFORM} "$@"
 }
 
 lookup() {	# regex; like grep, but prints first match on success, everything when failed

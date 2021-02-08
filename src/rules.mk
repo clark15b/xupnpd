@@ -20,3 +20,6 @@ clean:
 
 .cpp.o:
 	PATH=$(PATH):$(LIBEXEC) STAGING_DIR=$(STAGING_DIR) $(CPP) -c $(CFLAGS) -o $@ $<
+
+test: all
+	cd ../test; PLATFORM=$(PLATFORM) roundup plugins/*-test.sh	# https://github.com/samunders-core/roundup/tree/test_name_in_before_and_after
