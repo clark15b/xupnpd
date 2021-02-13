@@ -225,3 +225,16 @@ it_handles_shell_metachars_correctly() {
     seq -f "localmedia/0${SPECIAL}1_%1.0f.avi" 1 3 | tr '\n' '\0' | xargs -0t rm -f
   done
 }
+
+it_updates_item_position_when_played_again() {
+  it_preserves_5_symlinks_by_default
+
+  http stream/0_2_2.avi
+
+  [ ! -e recent/127.0.0.1/0[0-9]-0_1_1.avi ] && [ ! -L recent/127.0.0.1/0[0-9]-0_1_1.avi ]
+  [ -L recent/127.0.0.1/01-0_1_2.avi ]
+  [ -L recent/127.0.0.1/02-0_1_4.avi ]
+  [ -L recent/127.0.0.1/03-0_1_5.avi ]
+  [ -L recent/127.0.0.1/04-0_1_6.avi ]
+  [ -L recent/127.0.0.1/05-0_1_3.avi ]
+}

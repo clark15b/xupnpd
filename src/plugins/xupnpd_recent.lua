@@ -18,6 +18,9 @@ function recent_unique_name(pls) -- do not assume globally-unique pls.name (S02E
   for i, t in ipairs(playlist) do
     if pls.path:sub(1, #t[1]) == t[1] then
       local name, count = pls.path:sub(#t[1] + 1):gsub("^[.]?/+" , "", 1):gsub("/+", "-")
+      if t[2] == plugins.recent.name then -- caller will provide new index prefix
+        name, count = name:gsub("^%d+-", "")
+      end
       return name
     end
   end
@@ -47,10 +50,8 @@ function recent_keep_only(count, bytes, pipe)
 end
 
 function recent_manage_symlinks(pls, recent) -- recent is NOT /-terminated
-  recent_shell('exec mkdir -p "$1"', recent)
-  recent_shell('exec mv -v "$1" "$1.moved"', pls.path) -- searching for broken links since busybox' find has no -lname switch
-  recent_shell('exec find -L "$1" -maxdepth 1 -type l -exec rm -vf {} "+"', recent)
-  recent_shell('exec mv -v "$1.moved" "$1"', pls.path)                                                              -- make next line create
+  recent_shell('exec mkdir -p "$1"', recent) -- searching for broken links since busybox' find has no -lname switch
+  recent_shell('F="$(readlink -f "$1")" && mv -v "$F" "$F.moved" && find -L "$2" -maxdepth 1 -type l -exec rm -vf {} "+" ; mv -v "$F.moved" "$F"', pls.path, recent)
   recent_shell('exec ln -fsv "$(readlink -f "$1")" "$2/$(date +%s)-$3"', pls.path, recent, recent_unique_name(pls)) -- single existing link to pls.path
   local pipe_path = os.tmpname() 
   recent_shell('rm -f "$1" && mkfifo "$1"', pipe_path) -- rm since above creates file :-(
@@ -122,14 +123,17 @@ function recent_http_handler(what, from, port, msg)
     if pls and pls.path then
       local recent = recent_playlist_exists(from)
       local dir = recent_path() .. from
+      local sendevent = function() core.sendevent("reload") end
       if not recent then
         recent = { dir, plugins.recent.name, from }
-        playlist[#playlist + 1] = recent
+        table.insert(playlist, recent) -- not enough as we're in forked child process
+        sendevent = function() core.sendevent("update_playlist", dir, dir, plugins.recent.name, from) end
       elseif recent[1] ~= dir then
+        sendevent = function() core.sendevent("update_playlist", dir, unpack(recent)) end
         recent[1] = dir
       end
       recent_manage_symlinks(pls, recent[1])
-      core.sendevent("reload")  -- symlink changes are reason why this is invoked unconditionally
+      sendevent() -- symlink changes are reason why this is invoked unconditionally
     end
   end
 end

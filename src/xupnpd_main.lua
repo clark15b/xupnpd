@@ -293,6 +293,18 @@ end
 -- event handlers
 events['SIGUSR1']=reload_playlist
 events['reload']=reload_playlist
+events['update_playlist']=function(new_path, ...)
+  local pls = {...}
+  for i, t in ipairs(playlist) do
+    if table.concat(t) == table.concat(pls) then
+      t[1] = new_path
+      reload_playlist()
+      return
+    end 
+  end
+  table.insert(playlist, pls)
+  reload_playlist()
+end 
 events['store']=cache_store
 events['sys_gc']=sys_gc
 events['subscribe']=subscribe
