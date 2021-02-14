@@ -247,8 +247,8 @@ it_uses_ui_entered_count() {
 
 it_handles_shell_metachars_correctly() {
   sed -i -re "/^cfg[.]recent_count\s*=\s*/ s|[0-9]+|2|" xupnpd.lua
-  for SPECIAL in "'" '"' '`' '$' '&' '|' ';' ':' '\' '*' '!' '+' '#' '(' ')' '{' '}' '[' ']' '<' '>'; do
-    seq -f "localmedia/0${SPECIAL}1_%1.0f.avi" 1 3 | tr '\n' '\0' | xargs -0t touch
+  for SPECIAL in ' ' "'" '"' '`' '$' '&' '|' ';' ':' '\' '*' '!' '+' $'\n' $'\r' '#' '(' ')' '{' '}' '[' ']' '<' '>'; do
+    touch "localmedia/0${SPECIAL}1_1.avi" "localmedia/0${SPECIAL}1_2.avi" "localmedia/0${SPECIAL}1_3.avi"
     
     xupnpd &
     
@@ -260,7 +260,7 @@ it_handles_shell_metachars_correctly() {
     [ -L "recent/127.0.0.1/02-0${SPECIAL}1_2.avi" ] && ls -l "recent/127.0.0.1/02-0${SPECIAL}1_2.avi" | grep -F "$(pwd)/localmedia/0${SPECIAL}1_2.avi"
     [ -L "recent/127.0.0.1/01-0${SPECIAL}1_3.avi" ] && ls -l "recent/127.0.0.1/01-0${SPECIAL}1_3.avi" | grep -F "$(pwd)/localmedia/0${SPECIAL}1_3.avi"
     
-    seq -f "localmedia/0${SPECIAL}1_%1.0f.avi" 1 3 | tr '\n' '\0' | xargs -0t rm -f
+    rm -f "localmedia/0${SPECIAL}1_1.avi" "localmedia/0${SPECIAL}1_2.avi" "localmedia/0${SPECIAL}1_3.avi"
     rm -vf "recent/127.0.0.1/01-0${SPECIAL}1_3.avi" "recent/127.0.0.1/02-0${SPECIAL}1_2.avi"
     kill $!
   done
