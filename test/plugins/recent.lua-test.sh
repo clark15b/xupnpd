@@ -145,6 +145,39 @@ it_uses_configurable_count() {
   [ -L recent/127.0.0.1/01-0_1_3.avi ] && ls -l recent/127.0.0.1/01-0_1_3.avi | lookup '^.*localmedia/0_1_3[.]avi$'
 }
 
+it_retains_unique_path_components() {
+  for m in $(seq -f 'media%1.0f' 1 3); do
+    for s in $(seq -f 'S0%1.0f' 1 4); do
+      mkdir -p "localmedia/$m/$s"
+      seq -f "localmedia/$m/$s/0_1_${m}_${s}_%1.0f.avi" 1 3 | xargs -t touch
+    done
+  done
+  sed -i -re "/^cfg[.]recent_count\s*=\s*/ s|[0-9]+|36|" xupnpd.lua
+    
+  xupnpd &
+  
+  MO=$(seq 1 3 | shuf)
+  SO=$(seq 1 4 | shuf)
+  EO=$(seq 1 3 | shuf)
+  for m in $MO; do
+    for s in $SO; do
+      for e in $EO; do
+        http stream/0_1_${m}_${s}_$e.avi | lookup 'HTTP/1.1 200 OK'
+      done
+    done
+  done
+
+  for m in $(tac <<< "$MO" | sed 's/^/media/'); do
+    for s in $(tac <<< "$SO" | sed 's/^/S0/'); do
+      for e in $(tac <<< "$EO"); do
+        i=$(($i + 1))
+        P="recent/127.0.0.1/$(printf "%03d" $i)-$m-$s-0_1_${m}_${s}_$e.avi"
+        ls -l "$P" | lookup "^.*localmedia/$m/$s/0_1_${m}_${s}_$e"'[.]avi$'
+      done
+    done
+  done
+}
+
 it_uses_configurable_path_with_optional_terminal_slash() {
   touch localmedia/0_1_1.avi
   touch localmedia/0_1_2.avi

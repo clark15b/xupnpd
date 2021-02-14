@@ -91,12 +91,12 @@ function recent_manage_symlinks(pls, recent) -- recent is NOT /-terminated
   recent_shell('F="$(readlink -f "$1")" && mv $4 "$F" "$F.moved" && find -L "$2" -maxdepth 1 -type l -exec rm $4 -f {} "+" ; ' ..
     'mv $4 "$F.moved" "$F" ; ln $4 -fs "$F" "$2/0-$3"', pls.path, recent, recent_unique_name(pls), cfg.debug>0 and "-v" or "") -- keep single existing link to pls.path
   local remaining = recent_count()
-  for name in recent_popen('find "$1" -type l -print0 | sort -z', recent) do
+  for name in recent_popen('find "$1" -type l -print0 | LC_ALL=C sort -z', recent) do
     recent_keep_only_remaining(remaining, name)
     remaining = remaining - 1
   end
   local index, width = 1, #("" .. recent_count()) + 1
-  for name in recent_popen('find "$1" -type l -print0 | sort -z', recent) do
+  for name in recent_popen('find "$1" -type l -print0 | LC_ALL=C sort -z', recent) do
     recent_rename_with(index, width, name)
     index = index + 1
   end
