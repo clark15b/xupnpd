@@ -21,7 +21,7 @@ lookup() {	# [-F] [-A n] regex; like grep, but prints first match on success, ev
   [ "$1" = "-FA" ] && REGEX=0 && AFTER=$2 && shift && shift
   [ "$REGEX" -eq 1 -a "$1" = "-F" ] && REGEX=0 && shift
   [ "$AFTER" -eq 0 -a "$1" = "-A" ] && AFTER=$2 && shift && shift 
-  awk -v "AFTER=$AFTER" -v "REGEX=$REGEX" -v "PATT=$*" '
+  awk -v "AFTER=$AFTER" -v "REGEX=$REGEX" -v "PATT=${*/\\/\\\\}" '
     REGEX == 1 && $0 ~ PATT {found=1;lines=$0;if(AFTER==0)exit;next}
     REGEX == 0 && index($0, PATT) {found=1;lines=$0;if(AFTER==0)exit;next}
     lines {lines=lines""RS""$0;if(found&&--AFTER==0)exit;next}
@@ -290,8 +290,10 @@ it_handles_shell_metachars_correctly() {
     done
     
     [ ! -e "recent/127.0.0.1/0[0-9]-0${SPECIAL}1_1.avi" ] && [ ! -L "recent/127.0.0.1/0[0-9]-0${SPECIAL}1_1.avi" ] # lookup -F '...' has trouble with backslash
-    [ -L "recent/127.0.0.1/02-0${SPECIAL}1_2.avi" ] && ls -l "recent/127.0.0.1/02-0${SPECIAL}1_2.avi" | grep -F "$(pwd)/localmedia/0${SPECIAL}1_2.avi"
-    [ -L "recent/127.0.0.1/01-0${SPECIAL}1_3.avi" ] && ls -l "recent/127.0.0.1/01-0${SPECIAL}1_3.avi" | grep -F "$(pwd)/localmedia/0${SPECIAL}1_3.avi"
+    [ "$SPECIAL" = $'\n' ] || ls -l "recent/127.0.0.1/02-0${SPECIAL}1_2.avi" | lookup -F "$(pwd)/localmedia/0${SPECIAL}1_2.avi"
+    [ "$SPECIAL" = $'\n' ] || ls -l "recent/127.0.0.1/01-0${SPECIAL}1_3.avi" | lookup -F "$(pwd)/localmedia/0${SPECIAL}1_3.avi"
+    [ ! "$SPECIAL" = $'\n' ] || ls -l "recent/127.0.0.1/02-0${SPECIAL}1_2.avi" | grep -FA 1 "$(pwd)/localmedia/0" | grep -F '1_2.avi'
+    [ ! "$SPECIAL" = $'\n' ] || ls -l "recent/127.0.0.1/01-0${SPECIAL}1_3.avi" | grep -FA 1 "$(pwd)/localmedia/0" | grep -F '1_3.avi'
     
     rm -f "localmedia/0${SPECIAL}1_1.avi" "localmedia/0${SPECIAL}1_2.avi" "localmedia/0${SPECIAL}1_3.avi"
     rm -vf "recent/127.0.0.1/01-0${SPECIAL}1_3.avi" "recent/127.0.0.1/02-0${SPECIAL}1_2.avi"
