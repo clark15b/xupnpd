@@ -1,5 +1,5 @@
 *.[oa]
 *.sw[po]
-.idea/
-xupnpd
+.*
+xupnpd-*
 
