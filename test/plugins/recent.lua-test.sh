@@ -26,7 +26,7 @@ lookup() {	# [-F] [-A n] regex; like grep, but prints first match on success, ev
     REGEX == 0 && index($0, PATT) {found=1;lines=$0;if(AFTER==0)exit;next}
     lines {lines=lines""RS""$0;if(found&&--AFTER==0)exit;next}
     {lines=$0}
-    END {printf(lines);exit(1-found)}
+    END {print(lines);exit(1-found)}
   '
 }
 
