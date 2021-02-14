@@ -5,7 +5,7 @@ steps:
 - name: compile_and_test
   image: alpine:3.9		# 3.10 uses bash-5.0.x
   commands:
-    - apk add bash build-base coreutils curl git ncurses openssl-dev perl util-linux-dev # stdbuf in coreutils, tput in ncurses, uuid/uuid.h in util-linux-dev
+    - apk add bash build-base coreutils curl git ncurses openssl-dev perl-html-parser util-linux-dev # stdbuf in coreutils, tput in ncurses, uuid/uuid.h in util-linux-dev
     - git clone -b function_as_test_plan https://github.com/samunders-core/roundup.git
     - cd roundup
     - ./configure
