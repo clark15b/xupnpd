@@ -21,5 +21,5 @@ clean:
 .cpp.o:
 	PATH=$(PATH):$(LIBEXEC) STAGING_DIR=$(STAGING_DIR) $(CPP) -c $(CFLAGS) -o $@ $<
 
-test: all
-	cd ../test; PLATFORM=$(PLATFORM) roundup plugins/*-test.sh	# https://github.com/samunders-core/roundup/tree/test_name_in_before_and_after
+test: all	# either 'make test' or 'make test test=plugins/recent.lua-test.sh/it_symlinks_media_most_recent_first'
+	cd ../test; PLATFORM=$(PLATFORM) roundup $(or ${test},${test},plugins/*-test.sh)	# https://github.com/samunders-core/roundup/tree/function_as_test_plan
