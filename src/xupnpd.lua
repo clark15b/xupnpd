@@ -119,5 +119,7 @@ cfg.playlists_path='./playlists/'
 cfg.ui_path='./ui/'
 cfg.drive=''                    -- reload playlists only if drive state=active/idle, example: cfg.drive='/dev/sda'
 cfg.profiles='./profiles/'      -- device profiles feature
+cfg.recent_path='./recent/'   -- client history feature
+cfg.recent_count=5
 
 dofile('xupnpd_main.lua')
